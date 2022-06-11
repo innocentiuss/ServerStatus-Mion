@@ -1,0 +1,21 @@
+{"servers":
+[
+  {
+    "username": "test1",
+    "name": "测试1号",
+    "type": "Test1",
+    "host": "host1",
+    "location": "QWE",
+    "password": "12345678"
+  },
+  {
+    "disable": false,
+    "username": "kr2",
+    "name": "测试2号",
+    "type": "Test2",
+    "host": "host2",
+    "location": "ABC",
+    "password": "12345678"
+  }
+]
+}
