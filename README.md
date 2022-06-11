@@ -41,7 +41,7 @@ java -jar server-status-x.x.x.jar
 无报错后即可后台运行
 
 ```
-nohup java -jar server-status-x.x.x.jar
+nohup java -jar server-status-x.x.x.jar &
 ```
 
 5 Nginx或者其他Web服务器创建好网站后, 将Web下所有内容拷贝到网站根目录中, 例如
