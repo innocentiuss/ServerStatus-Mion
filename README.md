@@ -87,10 +87,10 @@ java -jar ... --netty.server.port=xxx
 ```shell
 wget https://raw.githubusercontent.com/innocentiuss/ServerStatus-Bubble/main/Status-Client/status_client.py
 vim status_client.py
-nohop python3 status_client.py &
+python3 status_client.py
 ```
 
-需要配合nohup实现后台运行
+连接成功后退出, 再配合nohup实现后台运行即可
 
 ## 相关项目
 
