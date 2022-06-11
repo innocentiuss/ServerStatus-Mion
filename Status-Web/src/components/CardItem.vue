@@ -89,6 +89,7 @@
             </div>
           </div>
         </div>
+        <p>TCP连接数: {{getStatus ? server.tcp : '-'}} | 进程数: {{getStatus ? server.process : '-'}} | 线程数: {{getStatus ? server.thread : '-'}}</p>
       </div>
     </div>
   </div>

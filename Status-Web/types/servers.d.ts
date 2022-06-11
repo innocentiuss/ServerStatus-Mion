@@ -32,6 +32,9 @@ declare global {
     'ping_189': number;
     'ping_10010': number;
     'ping_10086': number;
+    'tcp': number;
+    'thread': number;
+    'process': number;
   }
 
   interface Window {
