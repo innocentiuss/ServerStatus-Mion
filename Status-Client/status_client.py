@@ -142,19 +142,6 @@ def tupd():
     d = int(s[:-1]) - 2
     return t, u, p, d
 
-
-def get_network(ip_version):
-    if (ip_version == 4):
-        HOST = "ipv4.google.com"
-    elif (ip_version == 6):
-        HOST = "ipv6.google.com"
-    try:
-        socket.create_connection((HOST, 80), 2).close()
-        return True
-    except:
-        return False
-
-
 lostRate = {
     '10010': 0.0,
     '189': 0.0,
@@ -361,6 +348,7 @@ def byte_str(object):
 
 if __name__ == '__main__':
     socket.setdefaulttimeout(30)
+    # 3个线程分别去socket连接电信、联通、移动
     get_realtime_data()
     while True:
         try:
