@@ -10,8 +10,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, onMounted, onBeforeUnmount} from 'vue';
-import axios from 'axios';
+import { defineComponent, ref, onMounted, onBeforeUnmount, onUnmounted } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import TheError from '@/components/TheError.vue';
@@ -33,14 +32,42 @@ export default defineComponent({
   setup() {
     const servers = ref<Array<StatusItem | BoxItem>>();
     const updated = ref<number>();
-    const {interval} = window.__PRE_CONFIG__;
+    const { interval } = window.__PRE_CONFIG__;
     let timer: number;
-    const runFetch = () => axios.get('/json/').then(res => {
-      servers.value = res.data.servers;
-      updated.value = Number(res.data.updated);
-    }).catch(err => console.log(err));
-    onMounted(() => runFetch() && (timer = setInterval(runFetch, interval * 1000)));
-    onBeforeUnmount(() => clearInterval(timer));
+
+    const handleMessage = (data: string) => {
+      try {
+        const obj = JSON.parse(data);
+        servers.value = obj.servers;
+        updated.value = Number(obj.updated);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const host = window.location.host;
+    const ws = new WebSocket('ws://' + host + ':8080/connect');
+
+    ws.onmessage = (event: MessageEvent<string>) => {
+      const data = event.data;
+      handleMessage(data);
+    };
+    const getInfo = () => {
+      if (ws.readyState != 1) return;
+      ws.send(JSON.stringify({ msg: 'get' }));
+      console.log('getting data..');
+    };
+
+    onMounted(() => {
+      getInfo();
+      timer = setInterval(getInfo, interval * 1000);
+    });
+    onBeforeUnmount(() => {
+      clearInterval(timer);
+    });
+    onUnmounted(() => {
+      ws.close();
+    });
     return {
       servers,
       updated

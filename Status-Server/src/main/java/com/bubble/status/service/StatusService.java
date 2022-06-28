@@ -1,7 +1,6 @@
 package com.bubble.status.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.bubble.status.model.Status;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -17,6 +16,7 @@ public class StatusService implements InitializingBean {
     // key: ip+port
     private Map<String, Status> onlineServerStatus;
 
+
     @Override
     public void afterPropertiesSet() throws Exception {
         onlineServerStatus = new ConcurrentHashMap<>();
@@ -24,7 +24,9 @@ public class StatusService implements InitializingBean {
 
     public boolean updateStatus(String ip, int port, String statusJsonString) {
         Status status = JSON.parseObject(statusJsonString, Status.class);
-        onlineServerStatus.put(ip + port, status);
+        String key = ip + port;
+        //alertService.judge(key, status);
+        onlineServerStatus.put(key, status);
         return true;
     }
 
