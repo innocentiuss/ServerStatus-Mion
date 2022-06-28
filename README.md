@@ -2,9 +2,9 @@
 
 以Java为服务端实现的一款前后端分离服务器探针、云监控
 
-前端基于cokemine/Hotaru_theme项目修改, 使用Vue3、Typescript、Semantic UI
+前端基于cokemine/Hotaru_theme项目修改, 将HTTP换为Websocket实现通信, 使用Vue3、Typescript、Semantic UI
 
-服务端基于SpringBoot、Netty(NIO方式)实现, 适合Netty初学者作为入门项目学习
+服务端基于Netty、非阻塞IO方式实现
 
 客户端基于cppla/ServerStatus中Python客户端修改实现，无外部依赖
 
@@ -50,13 +50,7 @@ nohup java -jar server-status-x.x.x.jar &
 sudo cp -r web/* /home/wwwroot/yourwebsite
 ```
 
-6 对该网站配置一条反向代理规则, 将`localhost:80/json/`重定向到`localhost:8080/json/`即可正常运行, 以Nginx为例:
-
-```
-location /json/ {
-	proxy_pass http://localhost:8080/json/;
-}
-```
+即可正常运行
 
 ##### 服务端可选配置
 
