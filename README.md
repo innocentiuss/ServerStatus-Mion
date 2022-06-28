@@ -2,7 +2,7 @@
 
 以Java为服务端实现的一款前后端分离服务器探针、云监控
 
-前端基于cokemine/Hotaru_theme项目修改, 将HTTP换为Websocket实现通信, 使用Vue3、Typescript、Semantic UI
+前端基于cokemine/Hotaru_theme项目修改, 使用Websocket替代HTTP实现通信, 使用Vue3、Typescript、Semantic UI
 
 服务端基于Netty、非阻塞IO方式实现
 
