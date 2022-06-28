@@ -60,12 +60,6 @@ sudo cp -r web/* /home/wwwroot/yourwebsite
 java -jar server-status-x.x.x.jar --server.config=xxx.json
 ```
 
-Java Tomcat Web服务器端口，需要和上面反向代理规则一致(默认8080端口)
-
-```
-java -jar ... --server.port=xxxx
-```
-
 Netty服务器端口, 需要和客户端连接配置设置一致(默认48084端口)
 
 ```
