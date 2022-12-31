@@ -40,12 +40,14 @@ public class WebStatusService {
             // 跳过配置中disabled了服务器
             if (server.isDisabled()) continue;
 
+            // 先设置初始属性
             ServerInfoVo serverInfoVo = new ServerInfoVo();
             boolean online = server.isOnline();
             serverInfoVo.setType(server.getType());
             serverInfoVo.setName(server.getName());
             serverInfoVo.setLocation(server.getLocation());
             serverInfoVo.setOnline(online);
+            serverInfoVo.setRegion(server.getRegion());
 
             // 满足已经认证过的并且最新数据小于阈值的才返回结果
             if (online) {

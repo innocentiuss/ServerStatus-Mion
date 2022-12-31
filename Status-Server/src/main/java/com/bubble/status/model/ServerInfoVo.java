@@ -7,6 +7,15 @@ public class ServerInfoVo extends Status{
     private String location;
     private boolean isOnline;
     private boolean lost = false;
+    private String region;
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
 
     public boolean isLost() {
         return lost;

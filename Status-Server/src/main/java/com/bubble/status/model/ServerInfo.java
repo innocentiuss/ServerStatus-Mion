@@ -14,6 +14,7 @@ public class ServerInfo {
     private String connectedIP = "";
     private boolean isOnline = false;
     private boolean disabled = false;
+    private String region;
 
     public ServerInfo(String username, String name, String type, String host, String location, String password) {
         this.username = username;

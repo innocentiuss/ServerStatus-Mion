@@ -2,8 +2,15 @@
   <div class="column">
     <div class="ui fluid card">
       <div class="card-header">
-        <span> {{ server.name }} </span>
-        <p>{{ server.type }}</p>
+        <div class="ui two column grid">
+          <div class="left aligned column"><span> {{ server.name }} </span><p style="padding-top: 5px">{{ server.type }}</p></div>
+          <div class="right aligned column" style="padding-top: 10px">
+            <svg viewBox="0 0 100 100" class="flag-icon">
+              <use :xlink:href="`#${server.region}`"></use>
+            </svg>
+          </div>
+        </div>
+
       </div>
       <div class="ui tiny progress success">
         <div class="bar" :style="{width: getStatus ? `${getRAMStatus.toString()}%` : '0%'}">
@@ -157,9 +164,7 @@ div.card div.progress {
 }
 
 .flag-icon {
-  display: inline;
   vertical-align: middle;
-  width: 70px;
-  margin-right: 8px;
+  width: 50px;
 }
 </style>
