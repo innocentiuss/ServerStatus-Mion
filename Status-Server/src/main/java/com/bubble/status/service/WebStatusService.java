@@ -56,7 +56,9 @@ public class WebStatusService {
                     uptimeRound2(serverInfoVo);
                     lossRound1(serverInfoVo);
                 }
-
+                else {
+                    serverInfoVo.setLost(true);
+                }
             }
             voList.add(serverInfoVo);
         }

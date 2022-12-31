@@ -6,6 +6,15 @@ public class ServerInfoVo extends Status{
     private String type;
     private String location;
     private boolean isOnline;
+    private boolean lost = false;
+
+    public boolean isLost() {
+        return lost;
+    }
+
+    public void setLost(boolean lost) {
+        this.lost = lost;
+    }
 
     public boolean isOnline() {
         return isOnline;

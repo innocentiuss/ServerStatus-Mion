@@ -67,8 +67,13 @@ public class ConfigService implements InitializingBean {
         }
     }
 
+    public void refreshConfig() throws IOException {
+        readConfigs();
+    }
+
     /**
      * 获取所有配置了的服务器
+     *
      * @return 列表
      */
     public List<ServerInfo> getConfiguredServers() {

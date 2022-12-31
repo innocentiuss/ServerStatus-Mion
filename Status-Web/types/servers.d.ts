@@ -5,6 +5,7 @@ declare global {
     'host': string;
     'type': string;
     'online': boolean;
+    'lost': boolean;
     'location': string;
     'region': string;
   }

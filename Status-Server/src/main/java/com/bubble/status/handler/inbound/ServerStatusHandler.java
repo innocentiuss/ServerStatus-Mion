@@ -26,7 +26,6 @@ public class ServerStatusHandler extends SimpleChannelInboundHandler<Message> {
                 channelHandlerContext.fireChannelRead(message);
                 return;
             }
-
             InetSocketAddress inetSocketAddress = (InetSocketAddress) channelHandlerContext.channel().remoteAddress();
             statusService.updateStatus(inetSocketAddress.getAddress().getHostAddress(), inetSocketAddress.getPort(), message.getContent());
         }

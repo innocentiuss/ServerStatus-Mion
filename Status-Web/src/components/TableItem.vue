@@ -1,8 +1,8 @@
 <template>
   <tr class="tableRow" @click="collapsed = !collapsed">
     <td>
-      <div class="ui progress" :class="{'success': getStatus, 'error': !getStatus}">
-        <div class="bar" style="width: 100%"><span> {{ getStatus ? '运行中' : '维护中' }} </span>
+      <div class="ui progress" :class="getTypeColor(lost, getStatus)">
+        <div class="bar" style="width: 100%"><span> {{ getTypeName(lost, getStatus) }} </span>
         </div>
       </div>
     </td>
@@ -68,6 +68,18 @@ import useStatus from './useStatus';
 
 export default defineComponent({
   name: 'TableItem',
+  methods: {
+    getTypeName(lost: boolean, online: boolean) {
+      if (lost) return '失联中';
+      if (online) return '运行中';
+      return '维护中';
+    },
+    getTypeColor(lost: boolean, online: boolean) {
+      if (lost) return 'warning';
+      if (online) return 'success';
+      return 'error';
+    }
+  },
   props: {
     server: {
       type: Object as PropType<StatusItem | BoxItem>,

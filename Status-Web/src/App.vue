@@ -45,7 +45,7 @@ export default defineComponent({
       }
     };
 
-    const host = window.location.host;
+    const host = window.location.hostname;
     const ws = new WebSocket('ws://' + host + ':8080/connect');
 
     ws.onmessage = (event: MessageEvent<string>) => {

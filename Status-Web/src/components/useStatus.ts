@@ -6,6 +6,7 @@ interface Props {
 
 export default (props: Props) => {
   const getStatus = computed((): boolean => props.server.online);
+  const lost = computed((): boolean => props.server.lost);
 
   const getCpuStatus = computed((): number => (props.server as StatusItem).cpu === undefined ?
     100 : (props.server as StatusItem).cpu);
@@ -40,6 +41,7 @@ export default (props: Props) => {
 
   return {
     getStatus,
+    lost,
     getCpuStatus,
     getRAMStatus,
     getHDDStatus,

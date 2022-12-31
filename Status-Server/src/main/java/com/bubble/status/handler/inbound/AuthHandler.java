@@ -32,7 +32,7 @@ public class AuthHandler extends SimpleChannelInboundHandler<Message> {
             InetSocketAddress inetSocketAddress = (InetSocketAddress) channelHandlerContext.channel().remoteAddress();
             boolean success = authService.doAuth(message.getContent(), inetSocketAddress.getAddress().getHostAddress(), inetSocketAddress.getPort());
             if (!success) channelHandlerContext.writeAndFlush("Auth failed. Please check your settings!");
-            // message 不再使用 引用计数减一
+            // message 不再使用 引用计数减一 由simple来自己完成
         }
     }
 
