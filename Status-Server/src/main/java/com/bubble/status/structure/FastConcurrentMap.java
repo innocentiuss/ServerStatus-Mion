@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-
+// 自定义数据结构 暂时无用
 public class FastConcurrentMap {
 
     private static final Logger LOG = LoggerFactory.getLogger(FastConcurrentMap.class);

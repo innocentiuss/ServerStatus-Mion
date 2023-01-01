@@ -2,11 +2,13 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import MyApp from './MyApp.vue';
 import { createRouter, createWebHistory } from 'vue-router';
-import Setting from '@/Setting.vue';
+import Admin from '@/views/Admin.vue';
+import LoginView from '@/views/LoginView.vue';
 
 const routes = [
   { path: '/', component: App },
-  { path: '/settings', component: Setting }
+  { path: '/admin', component: Admin },
+  { path: '/login', component: LoginView }
 ];
 const router = createRouter({
   routes,

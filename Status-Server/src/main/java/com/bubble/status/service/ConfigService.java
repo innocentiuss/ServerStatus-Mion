@@ -1,20 +1,18 @@
 package com.bubble.status.service;
 
 
-import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.bubble.status.exceptions.ConfigErrorException;
 import com.bubble.status.model.ServerInfo;
+import com.bubble.status.utils.ReadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,14 +45,7 @@ public class ConfigService implements InitializingBean {
     private void readConfigs() throws IOException {
         configuredServers = new ConcurrentHashMap<>();
 
-        File file = new File(".", configFileName);
-        String jsonString;
-        // 适配从IDE下运行读文件与打成jar后读文件
-        try {
-            jsonString = FileUtil.readString(configFileName, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            jsonString = FileUtil.readString(file, StandardCharsets.UTF_8);
-        }
+        String jsonString = ReadUtil.readJsonConfig(configFileName);
         JSONArray serversJson = JSON.parseObject(jsonString).getJSONArray("servers");
 
         for (int i = 0; i < serversJson.size(); i++) {
