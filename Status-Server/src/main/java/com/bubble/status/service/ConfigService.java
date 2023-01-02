@@ -75,4 +75,14 @@ public class ConfigService implements InitializingBean {
         return result;
     }
 
+    /**
+     * 获取配置文件 返回给前端
+     * @return json string
+     */
+    public String getAllConfigs() {
+        String jsonString = ReadUtil.readJsonConfig(configFileName);
+        JSONArray serversJson = JSON.parseObject(jsonString).getJSONArray("servers");
+        return serversJson.toJSONString();
+    }
+
 }

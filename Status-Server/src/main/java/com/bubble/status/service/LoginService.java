@@ -2,6 +2,7 @@ package com.bubble.status.service;
 
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bubble.status.model.Login;
@@ -21,6 +22,12 @@ public class LoginService {
     @Value("${server.config}")
     private String configFileName;
 
+    /**
+     * 后台登录
+     * @param loginInfo 传入登录信息 已经在前端过了md5
+     * @param httpServletResponse 用于下发cookie
+     * @return json string
+     */
     public String doLogin(Login loginInfo, HttpServletResponse httpServletResponse) {
         Login settingLoginInfoMD5 = getMD5LoginConfigInfo();
 
@@ -36,6 +43,11 @@ public class LoginService {
         return new WebResponse("login failed", 401).toString();
     }
 
+    /**
+     * 检查是否登录
+     * @param request http请求 用来拿cookie
+     * @return json string
+     */
     public String checkLogin(HttpServletRequest request) {
         Login settingLoginInfoMD5 = getMD5LoginConfigInfo();
         Cookie cookie = ServletUtil.getCookie(request, "isLogin");
@@ -44,12 +56,16 @@ public class LoginService {
         if (cookie != null &&
                 CheckUtil.isSame(SecureUtil.sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword())
                         , cookie.getValue())) {
-            return new WebResponse("ok", 200).toString();
+            return new WebResponse("ok", HttpStatus.HTTP_OK).toString();
         }
 
-        return new WebResponse("/login", 301).toString();
+        return new WebResponse("/login", HttpStatus.HTTP_TEMP_REDIRECT).toString();
     }
 
+    /**
+     * 从配置文件拿登录信息 并将数据过一次md5
+     * @return 登录信息obj
+     */
     private Login getMD5LoginConfigInfo() {
         // 从配置文件拿数据
         String jsonString = ReadUtil.readJsonConfig(configFileName);

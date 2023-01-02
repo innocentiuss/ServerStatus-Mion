@@ -11,6 +11,7 @@ public class CorsConfig {
 
     @Bean
     public CorsFilter corsFilter() {
+        // 跨域问题配置
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedOrigin("http://localhost:8081");
