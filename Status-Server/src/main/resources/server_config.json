@@ -13,7 +13,7 @@
       "region": "CA"
     },
     {
-      "disable": false,
+      "disabled": false,
       "username": "kr2",
       "name": "测试2号",
       "type": "Test2",
