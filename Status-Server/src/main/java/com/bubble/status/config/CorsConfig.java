@@ -17,6 +17,7 @@ public class CorsConfig {
         corsConfiguration.addAllowedOrigin("http://localhost:8081");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("POST");
+        corsConfiguration.addAllowedMethod("GET");
 
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**",corsConfiguration);
