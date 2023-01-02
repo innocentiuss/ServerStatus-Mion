@@ -4,6 +4,7 @@ package com.bubble.status.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.bubble.status.exceptions.ConfigErrorException;
+import com.bubble.status.model.ConfigsInfoVo;
 import com.bubble.status.model.ServerInfo;
 import com.bubble.status.utils.ReadUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -76,13 +77,20 @@ public class ConfigService implements InitializingBean {
     }
 
     /**
-     * 获取配置文件 返回给前端
+     * 获取配置文件信息 返回给前端
      * @return json string
      */
     public String getAllConfigs() {
         String jsonString = ReadUtil.readJsonConfig(configFileName);
         JSONArray serversJson = JSON.parseObject(jsonString).getJSONArray("servers");
-        return serversJson.toJSONString();
+
+        List<ConfigsInfoVo> configs = new ArrayList<>();
+        for (int i = 0; i < serversJson.size(); i++) {
+            ConfigsInfoVo vo = serversJson.getObject(i, ConfigsInfoVo.class);
+            configs.add(vo);
+        }
+
+        return JSON.toJSONString(configs);
     }
 
 }
