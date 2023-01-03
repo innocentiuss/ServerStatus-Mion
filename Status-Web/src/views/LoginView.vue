@@ -9,11 +9,11 @@
     <div class="two fields">
       <div class="field">
         <label>用户名</label>
-        <input placeholder="username" type="text" v-model="loginForm.username">
+        <input placeholder="请输入用户名" type="text" v-model="loginForm.username">
       </div>
       <div class="field">
         <label>密码</label>
-        <input placeholder="password" type="password" v-model="loginForm.password">
+        <input placeholder="请输入密码" type="password" v-model="loginForm.password">
       </div>
     </div>
     <div class="ui submit button" @click="submitForm()">登录</div>
@@ -29,12 +29,12 @@ import { Md5 } from 'ts-md5';
 
 export default defineComponent({
   setup() {
-
+    const host = window.location.hostname;
     const router = useRouter();
     const data = reactive(new InitData());
     const submitForm = () => {
       axios({
-        url: 'http://localhost:8080/doLogin',
+        url: 'http://' + host + ':8080/doLogin',
         method: 'post',
         data: {
           username: Md5.hashStr(data.loginForm.username),

@@ -87,6 +87,7 @@ public class ConfigService implements InitializingBean {
         List<ConfigsInfoVo> configs = new ArrayList<>();
         for (int i = 0; i < serversJson.size(); i++) {
             ConfigsInfoVo vo = serversJson.getObject(i, ConfigsInfoVo.class);
+            vo.setEnabled(!vo.isDisabled());
             configs.add(vo);
         }
 
