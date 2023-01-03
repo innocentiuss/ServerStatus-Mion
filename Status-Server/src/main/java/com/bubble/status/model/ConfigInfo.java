@@ -11,4 +11,5 @@ public class ConfigInfo {
     private String type;
     private String location;
     private String region;
+    private boolean enabled = true;
 }

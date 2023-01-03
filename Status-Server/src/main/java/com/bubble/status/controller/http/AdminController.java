@@ -1,11 +1,14 @@
 package com.bubble.status.controller.http;
 
 import cn.hutool.http.HttpStatus;
+import com.bubble.status.exceptions.CommonException;
 import com.bubble.status.exceptions.ConfigErrorException;
+import com.bubble.status.model.ConfigInfo;
 import com.bubble.status.model.Login;
 import com.bubble.status.model.WebResponse;
 import com.bubble.status.service.ConfigService;
 import com.bubble.status.service.LoginService;
+import com.bubble.status.utils.CheckUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +32,7 @@ public class AdminController {
         try {
             return loginService.doLogin(loginInfo, httpServletResponse);
         } catch (Exception e) {
-            return new WebResponse("unknown error", HttpStatus.HTTP_INTERNAL_ERROR).toString();
+            return new WebResponse(e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
         }
     }
 
@@ -38,7 +41,7 @@ public class AdminController {
         try {
             return loginService.checkLogin(httpServletRequest);
         } catch (Exception e) {
-            return new WebResponse("unknown error", HttpStatus.HTTP_INTERNAL_ERROR).toString();
+            return new WebResponse(e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
         }
     }
     @GetMapping("/getConfigs")
@@ -58,5 +61,19 @@ public class AdminController {
             return new WebResponse(exception.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
         }
         return new WebResponse("ok", HttpStatus.HTTP_OK).toString();
+    }
+
+    @PostMapping("/addConfigs")
+    public String addConfigs(@RequestBody ConfigInfo configInfo, HttpServletRequest httpServletRequest) {
+        try {
+            CheckUtil.check(loginService.isLogin(httpServletRequest), "登录不合法, 拒绝访问", HttpStatus.HTTP_FORBIDDEN);
+            configService.proceedingAddConfig(configInfo);
+            return new WebResponse("添加成功", HttpStatus.HTTP_OK).toString();
+        }catch (CommonException e) {
+            return new WebResponse(e.getMessage(), e.getHttpCode()).toString();
+        }
+        catch (Exception e) {
+            return new WebResponse(e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
+        }
     }
 }

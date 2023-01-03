@@ -5,11 +5,10 @@ import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
-public class ReadUtil {
+public class IOUtil {
 
     public static String readStringFromBuf(ByteBuf byteBuf, int length) {
         byte[] magicNumBytes = new byte[length];
@@ -27,5 +26,14 @@ public class ReadUtil {
             jsonString = FileUtil.readString(file, StandardCharsets.UTF_8);
         }
         return jsonString;
+    }
+
+    public static void writeString2File(String toWrite, String fileName) {
+        File file = new File(".", fileName);
+        try {
+            FileUtil.writeString(toWrite, fileName, StandardCharsets.UTF_8);
+        }catch (Exception e) {
+            FileUtil.writeString(toWrite, file, StandardCharsets.UTF_8);
+        }
     }
 }

@@ -2,7 +2,7 @@ package com.bubble.status.handler.protocol;
 
 import com.bubble.status.model.Message;
 import com.bubble.status.utils.CheckUtil;
-import com.bubble.status.utils.ReadUtil;
+import com.bubble.status.utils.IOUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -16,7 +16,7 @@ public class InfoMessageDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
         // 6字节魔数
-        String magicNum = ReadUtil.readStringFromBuf(byteBuf, 6);
+        String magicNum = IOUtil.readStringFromBuf(byteBuf, 6);
         if (CheckUtil.isNotSame(magicNum, "bubble")) {
             InetSocketAddress inetSocketAddress = (InetSocketAddress) channelHandlerContext.channel().remoteAddress();
             log.warn("接收到数据包错误, 断开连接, ip: {}", inetSocketAddress.getAddress().getHostAddress());
@@ -29,7 +29,7 @@ public class InfoMessageDecoder extends ByteToMessageDecoder {
         // 4字节长度
         int length = byteBuf.readInt();
         // 根据长度读取内容
-        String content = ReadUtil.readStringFromBuf(byteBuf, length);
+        String content = IOUtil.readStringFromBuf(byteBuf, length);
         Message message = new Message(type, content);
         list.add(message);
     }

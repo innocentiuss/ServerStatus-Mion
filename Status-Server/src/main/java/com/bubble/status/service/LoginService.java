@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.bubble.status.model.Login;
 import com.bubble.status.model.WebResponse;
 import com.bubble.status.utils.CheckUtil;
-import com.bubble.status.utils.ReadUtil;
+import com.bubble.status.utils.IOUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,7 @@ public class LoginService {
 
             // 计算cookie值, 暂时定义为用户名+密码过完MD5后过一次sha1
             String cookieVal = SecureUtil.sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword());
-            ServletUtil.addCookie(httpServletResponse, "isLogin", cookieVal, 600, "/", null);
+            ServletUtil.addCookie(httpServletResponse, "isLogin", cookieVal, -1, "/", null);
             return new WebResponse("login ok", 200).toString();
         }
         return new WebResponse("login failed", 401).toString();
@@ -49,15 +49,8 @@ public class LoginService {
      * @return json string
      */
     public String checkLogin(HttpServletRequest request) {
-        Login settingLoginInfoMD5 = getMD5LoginConfigInfo();
-        Cookie cookie = ServletUtil.getCookie(request, "isLogin");
-
-        // 检查cookie是否正确
-        if (cookie != null &&
-                CheckUtil.isSame(SecureUtil.sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword())
-                        , cookie.getValue())) {
+        if (isLogin(request))
             return new WebResponse("ok", HttpStatus.HTTP_OK).toString();
-        }
 
         return new WebResponse("/login", HttpStatus.HTTP_TEMP_REDIRECT).toString();
     }
@@ -68,11 +61,27 @@ public class LoginService {
      */
     private Login getMD5LoginConfigInfo() {
         // 从配置文件拿数据
-        String jsonString = ReadUtil.readJsonConfig(configFileName);
-        CheckUtil.check(jsonString != null, "read config error!");
+        String jsonString = IOUtil.readJsonConfig(configFileName);
+        CheckUtil.check(jsonString != null, "read config error!", HttpStatus.HTTP_INTERNAL_ERROR);
         JSONObject loginInfoSet = JSON.parseObject(jsonString).getJSONObject("loginInfo");
         String settingNameMD5 = SecureUtil.md5(loginInfoSet.getString("username"));
         String settingPassMD5 = SecureUtil.md5(loginInfoSet.getString("password"));
         return new Login(settingNameMD5, settingPassMD5);
+    }
+
+    /**
+     * 主要是用于校验cookie
+     * @param request http请求 用来拿cookie
+     * @return true: 登录合法; false: 登录不合法
+     */
+    public boolean isLogin(HttpServletRequest request) {
+        // 检查cookie是否正确
+        Login settingLoginInfoMD5 = getMD5LoginConfigInfo();
+        Cookie cookie = ServletUtil.getCookie(request, "isLogin");
+        return cookie != null &&
+                CheckUtil.isSame(
+                        SecureUtil.sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword()),
+                        cookie.getValue()
+                );
     }
 }

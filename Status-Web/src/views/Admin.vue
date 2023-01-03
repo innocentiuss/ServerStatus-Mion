@@ -81,7 +81,7 @@
           </div>
         </td>
         <td>
-          <div class="ui primary button">
+          <div class="ui primary button" @click="addConfigs">
             添加服务器
           </div>
         </td>
@@ -150,8 +150,6 @@ export default defineComponent({
       });
     }
 
-
-
     const newConfig: Config = reactive({
       name: '',
       password: '',
@@ -161,13 +159,30 @@ export default defineComponent({
       type: '',
       enabled: true
     });
+    
+    function addConfigs() {
+      axios({
+        url: 'http://' + host + ':8080/addConfigs',
+        method: 'post',
+        withCredentials: true,
+        data: newConfig
+      }).then(res => {
+        if (res.data.code == 200) {
+          console.log('添加成功');
+          loadConfigs();
+        } else {
+          alert(res.data.data);
+        }
+      });
+    }
 
     loadConfigs();
 
     return {
+      addConfigs,
       newConfig,
       configsData,
-      loadConfigs,
+      loadConfigs
     };
   }
 });
