@@ -4,6 +4,7 @@ package com.bubble.status.service;
 import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.bubble.status.exceptions.CommonException;
 import com.bubble.status.model.ConfigInfo;
 import com.bubble.status.model.Configs;
@@ -12,7 +13,6 @@ import com.bubble.status.utils.CheckUtil;
 import com.bubble.status.utils.IOUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -126,7 +126,7 @@ public class ConfigService implements InitializingBean {
         servers.add(configInfo);
 
         // 序列化并保存
-        IOUtil.writeString2File(JSON.toJSONString(configs), configFileName);
+        IOUtil.writeString2File(JSON.toJSONString(configs, SerializerFeature.PrettyFormat), configFileName);
         refreshConfig();
         log.info("成功添加新服务器配置啦: username=" + configInfo.getUsername());
     }
@@ -144,7 +144,7 @@ public class ConfigService implements InitializingBean {
         Configs configs = readConfigsFromFile();
         configs.setServers(configInfos);
 
-        IOUtil.writeString2File(JSON.toJSONString(configs), configFileName);
+        IOUtil.writeString2File(JSON.toJSONString(configs, SerializerFeature.PrettyFormat), configFileName);
         refreshConfig();
         log.info("保存服务器配置成功啦");
     }

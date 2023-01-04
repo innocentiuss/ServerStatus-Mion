@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
@@ -28,12 +28,10 @@ public class IOUtil {
         return jsonString;
     }
 
-    public static void writeString2File(String toWrite, String fileName) {
-        File file = new File(".", fileName);
-        try {
-            FileUtil.writeString(toWrite, fileName, StandardCharsets.UTF_8);
-        }catch (Exception e) {
-            FileUtil.writeString(toWrite, file, StandardCharsets.UTF_8);
-        }
+    public static void writeString2File(String toWrite, String fileName) throws IOException {
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
+        outputStreamWriter.write(toWrite);
+        outputStreamWriter.close();
     }
 }
