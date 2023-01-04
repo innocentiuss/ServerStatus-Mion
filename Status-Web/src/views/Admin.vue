@@ -1,7 +1,6 @@
 <template>
   <div>
     <div class="ui teal dividing header" style="padding-top:10px;padding-left: 10px">
-
       <div class="content">
         节点设置
         <div class="sub header">Sub-header</div>
@@ -138,11 +137,14 @@
       <tr>
         <th></th>
         <th colspan="7">
-          <div class="ui small button" @click="loadConfigs">
-            放弃修改&重新加载配置
-          </div>
-          <div class="ui small positive button" @click="saveConfigs">
-            保存&应用
+          <div class="ui buttons">
+            <div class="ui small button" @click="loadConfigs">
+              放弃修改&重新加载配置
+            </div>
+            <div class="or"></div>
+            <div class="ui small positive button" @click="saveConfigs">
+              保存&应用
+            </div>
           </div>
           <span v-if="modified"><b>←检测到有修改，点它生效</b></span>
           <div class="ui slider checkbox" style="margin-left: 10px">
