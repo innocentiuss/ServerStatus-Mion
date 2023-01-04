@@ -26,15 +26,15 @@ import { InitData } from '../../types/login';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { Md5 } from 'ts-md5';
+import { host, port } from '../../globals';
 
 export default defineComponent({
   setup() {
-    const host = window.location.hostname;
     const router = useRouter();
     const data = reactive(new InitData());
     const submitForm = () => {
       axios({
-        url: 'http://' + host + ':8080/doLogin',
+        url: 'http://' + host + ':' + port +'/api/doLogin',
         method: 'post',
         data: {
           username: Md5.hashStr(data.loginForm.username),

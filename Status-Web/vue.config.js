@@ -1,5 +1,8 @@
 const resolve = d => require('path').resolve(__dirname, d);
 module.exports = {
+  configureWebpack: {
+    mode: 'development'
+  },
   publicPath: './',
   pages: {
     index: {

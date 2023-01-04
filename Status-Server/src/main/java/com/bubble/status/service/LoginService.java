@@ -37,7 +37,7 @@ public class LoginService {
 
             // 计算cookie值, 暂时定义为用户名+密码过完MD5后过一次sha1
             String cookieVal = SecureUtil.sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword());
-            ServletUtil.addCookie(httpServletResponse, "isLogin", cookieVal, -1, "/", null);
+            ServletUtil.addCookie(httpServletResponse, "isLogin", cookieVal, 1200, "/", null);
             return new WebResponse("login ok", 200).toString();
         }
         return new WebResponse("login failed", 401).toString();

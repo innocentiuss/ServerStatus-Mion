@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.bubble</groupId>
     <artifactId>server-status</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
     <name>status</name>
     <description>ServerStatus probe server</description>
     <properties>
@@ -39,11 +39,6 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.78</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-recipes</artifactId>
-            <version>5.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

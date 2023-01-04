@@ -168,12 +168,12 @@ import { defineComponent, reactive, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { Config } from 'types/config';
+import { host, port } from '../../globals';
 
 export default defineComponent({
 
   setup() {
     const router = useRouter();
-    const host = window.location.hostname;
     const editVisible = ref(false);
     const allowDelete = ref(false);
     const configsData = reactive<{ arr: Config[] }>({ arr: [] });
@@ -183,7 +183,7 @@ export default defineComponent({
     // 登录检查
     function checkLogin() {
       axios({
-        url: 'http://' + host + ':8080/checkLogin',
+        url: 'http://' + host + ':' + port +'/api/checkLogin',
         method: 'post',
         withCredentials: true
       }).then(res => {
@@ -200,7 +200,7 @@ export default defineComponent({
 
     function loadConfigs() {
       axios({
-        url: 'http://' + host + ':8080/getConfigs',
+        url: 'http://' + host + ':' + port +'/api/getConfigs',
         method: 'get',
         withCredentials: true
       }).then(res => {
@@ -234,7 +234,7 @@ export default defineComponent({
 
     function addConfigs() {
       axios({
-        url: 'http://' + host + ':8080/addConfig',
+        url: 'http://' + host + ':' + port +'/api/addConfig',
         method: 'post',
         withCredentials: true,
         data: newConfig
@@ -256,7 +256,7 @@ export default defineComponent({
 
     function saveConfigs() {
       axios({
-        url: 'http://' + host + ':8080/saveConfigs',
+        url: 'http://' + host + ':' + port +'/api/saveConfigs',
         method: 'post',
         withCredentials: true,
         data: configsData.arr
