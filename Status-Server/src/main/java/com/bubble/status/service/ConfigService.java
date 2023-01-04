@@ -12,6 +12,7 @@ import com.bubble.status.utils.CheckUtil;
 import com.bubble.status.utils.IOUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,7 @@ public class ConfigService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        configuredServers = new ConcurrentHashMap<>();
         loadConfigs();
     }
 
@@ -46,6 +48,10 @@ public class ConfigService implements InitializingBean {
      * 加载服务器配置信息
      */
     private void loadConfigs() {
+        // 为了解决热加载后, 所有online都变成默认的false了
+        // 先保留下加载之前的online信息
+        Map<String, ServerInfo> oldMap = configuredServers;
+
         configuredServers = new ConcurrentHashMap<>();
 
         String jsonString = IOUtil.readJsonConfig(configFileName);
@@ -56,6 +62,16 @@ public class ConfigService implements InitializingBean {
 
             if (configuredServers.containsKey(serverInfo.getUsername()))
                 throw new CommonException("配置文件中出现重复username, 检查一下吧");
+
+
+            // 替换时, 先同步下连接信息, 不然的话会影响后面的继续更新数据
+            ServerInfo oldInfo = oldMap.get(serverInfo.getUsername());
+            if (oldInfo != null) {
+                serverInfo.setOnline(oldInfo.isOnline());
+                serverInfo.setHost(oldInfo.getHost());
+                serverInfo.setConnectedIP(oldInfo.getConnectedIP());
+                serverInfo.setConnectedPort(oldInfo.getConnectedPort());
+            }
 
             configuredServers.put(serverInfo.getUsername(), serverInfo);
         }
