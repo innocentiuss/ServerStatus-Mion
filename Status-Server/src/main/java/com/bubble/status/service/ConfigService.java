@@ -100,7 +100,7 @@ public class ConfigService implements InitializingBean {
      * 添加单个配置加入到文件中
      * @param configInfo 待添加信息
      */
-    public synchronized void proceedingAddConfig(ConfigInfo configInfo) {
+    public synchronized void proceedingAddConfig(ConfigInfo configInfo) throws IOException {
         Configs configs = readConfigsFromFile();
         // 添加新设置
         List<ConfigInfo> servers = configs.getServers();
@@ -111,6 +111,7 @@ public class ConfigService implements InitializingBean {
 
         // 序列化并保存
         IOUtil.writeString2File(JSON.toJSONString(configs), configFileName);
+        refreshConfig();
         log.info("成功添加新服务器配置啦: username=" + configInfo.getUsername());
     }
 
