@@ -63,6 +63,8 @@ location /api/ {
 
 即可正常运行~
 
++ 后台管理页面为:http://yourDomain/admin
+
 ##### 服务端可选配置
 
 自定义配置文件名(需要在jar包同目录下)
