@@ -10,14 +10,12 @@ import com.bubble.status.service.ConfigService;
 import com.bubble.status.service.LoginService;
 import com.bubble.status.utils.CheckUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class AdminController {
@@ -44,11 +42,12 @@ public class AdminController {
             return new WebResponse(e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
         }
     }
+
     @GetMapping("/getConfigs")
     public String getConfigs() {
         try {
             return new WebResponse(configService.getAllConfigs(), HttpStatus.HTTP_OK).toString();
-        }catch (Exception e) {
+        } catch (Exception e) {
             return new WebResponse(e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
         }
     }
@@ -57,22 +56,34 @@ public class AdminController {
     public String reloadConfigs() {
         try {
             configService.refreshConfig();
-        }catch (ConfigErrorException | IOException exception) {
+        } catch (ConfigErrorException | IOException exception) {
             return new WebResponse(exception.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
         }
         return new WebResponse("ok", HttpStatus.HTTP_OK).toString();
     }
 
-    @PostMapping("/addConfigs")
+    @PostMapping("/addConfig")
     public String addConfigs(@RequestBody ConfigInfo configInfo, HttpServletRequest httpServletRequest) {
         try {
             CheckUtil.check(loginService.isLogin(httpServletRequest), "登录不合法, 拒绝访问", HttpStatus.HTTP_FORBIDDEN);
             configService.proceedingAddConfig(configInfo);
             return new WebResponse("添加成功", HttpStatus.HTTP_OK).toString();
-        }catch (CommonException e) {
+        } catch (CommonException e) {
             return new WebResponse(e.getMessage(), e.getHttpCode()).toString();
+        } catch (Exception e) {
+            return new WebResponse(e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
         }
-        catch (Exception e) {
+    }
+
+    @PostMapping("/saveConfigs")
+    public String saveConfigs(@RequestBody List<ConfigInfo> configInfos, HttpServletRequest httpServletRequest) {
+        try {
+            CheckUtil.check(loginService.isLogin(httpServletRequest), "登录不合法, 拒绝访问", HttpStatus.HTTP_FORBIDDEN);
+            configService.proceedingSaveConfig(configInfos);
+            return new WebResponse("添加成功", HttpStatus.HTTP_OK).toString();
+        } catch (CommonException e) {
+            return new WebResponse(e.getMessage(), e.getHttpCode()).toString();
+        } catch (Exception e) {
             return new WebResponse(e.getMessage(), HttpStatus.HTTP_INTERNAL_ERROR).toString();
         }
     }

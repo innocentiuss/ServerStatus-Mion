@@ -11,6 +11,8 @@
       <div class="header">注意事项</div>
       <ul class="list">
         <li>国家那栏只能填写两个大写英文(例如美国就写US)，不然国旗会不能正常渲染</li>
+        <li>为防误点，删除节点配置前，先要打开最下面的允许删除开关，不然不会有反应</li>
+        <li>修改和删除需要点击保存&应用，才能同步到配置文件并正式启用，添加不用</li>
       </ul>
     </div>
     <table class="ui compact celled table">
@@ -27,7 +29,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="config in configsData.values" :key="config.username">
+      <tr v-for="(config, index) in configsData.arr" :key="index">
         <td class="collapsing">
           <div class="ui toggle checkbox">
             <input type="checkbox" v-model="config.enabled" disabled="disabled"><label></label>
@@ -40,8 +42,53 @@
         <td>{{ config.password }}</td>
         <td>{{ config.region }}</td>
         <td>
-          <div class="ui teal button">修改配置</div>
-          <div class="negative ui button">删除配置</div>
+          <div class="ui teal button" @click="startEdit(config, index)">修改配置</div>
+          <div class="negative ui button" @click="deleteConfigs(index)">删除配置</div>
+        </td>
+      </tr>
+      <tr v-if="editVisible">
+        <td>
+          <div class="ui toggle checkbox">
+            <input type="checkbox" v-model="editedConfig.enabled"><label></label>
+          </div>
+        </td>
+        <td>
+          <div class="ui input">
+            <input type="text" placeholder="展示的节点名" v-model="editedConfig.name">
+          </div>
+        </td>
+        <td>
+          <div class="ui input">
+            <input type="text" placeholder="虚拟化类型/服务商类型" v-model="editedConfig.type">
+          </div>
+        </td>
+        <td>
+          <div class="ui input">
+            <input type="text" placeholder="所在城市/州" v-model="editedConfig.location">
+          </div>
+        </td>
+        <td>
+          <div class="ui input">
+            <input type="text" placeholder="连接的用户名" v-model="editedConfig.username">
+          </div>
+        </td>
+        <td>
+          <div class="ui input">
+            <input type="text" placeholder="连接的密码" v-model="editedConfig.password">
+          </div>
+        </td>
+        <td>
+          <div class="ui input">
+            <input type="text" placeholder="用于渲染国旗" v-model="editedConfig.region">
+          </div>
+        </td>
+        <td>
+          <div class="ui positive button" @click="finishEdit">
+            编辑完成
+          </div>
+          <div class="ui button" @click="exitEdit">
+            放弃编辑
+          </div>
         </td>
       </tr>
       <tr>
@@ -94,8 +141,16 @@
           <div class="ui small button" @click="loadConfigs">
             放弃修改&重新加载配置
           </div>
-          <div class="ui small positive button">
+          <div class="ui small positive button" @click="saveConfigs">
             保存&应用
+          </div>
+          <div class="ui slider checkbox" style="margin-left: 10px">
+            <input type="checkbox" name="newsletter" v-model="allowDelete">
+            <label>允许删除:
+              <span v-bind:style="{ fontWeight: allowDelete ? 'bold' : 'normal' }">
+              {{ allowDelete ? '是' : '否' }}
+            </span>
+            </label>
           </div>
         </th>
       </tr>
@@ -106,17 +161,20 @@
 
 <script lang="ts">
 
-import { defineComponent, reactive } from 'vue';
+import { defineComponent, reactive, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { Config } from 'types/config';
-
 
 export default defineComponent({
 
   setup() {
     const router = useRouter();
     const host = window.location.hostname;
+    const editVisible = ref(false);
+    const allowDelete = ref(false);
+    const configsData = reactive<{ arr: Config[] }>({ arr: [] });
+    const editIndex = ref(0);
 
     // 登录检查
     function checkLogin() {
@@ -133,8 +191,8 @@ export default defineComponent({
     }
 
     checkLogin();
+
     // 数据装载
-    const configsData = reactive<Array<Config>>([]);
 
     function loadConfigs() {
       axios({
@@ -143,7 +201,7 @@ export default defineComponent({
         withCredentials: true
       }).then(res => {
         if (res.data.code == 200) {
-          configsData.values = JSON.parse(res.data.data);
+          configsData.arr = JSON.parse(res.data.data);
         } else {
           alert('获取配置文件失败!');
         }
@@ -159,10 +217,19 @@ export default defineComponent({
       type: '',
       enabled: true
     });
-    
+    const editedConfig: Config = reactive({
+      name: '',
+      password: '',
+      username: '',
+      region: '',
+      location: '',
+      type: '',
+      enabled: true
+    });
+
     function addConfigs() {
       axios({
-        url: 'http://' + host + ':8080/addConfigs',
+        url: 'http://' + host + ':8080/addConfig',
         method: 'post',
         withCredentials: true,
         data: newConfig
@@ -176,13 +243,76 @@ export default defineComponent({
       });
     }
 
+    function saveConfigs() {
+      axios({
+        url: 'http://' + host + ':8080/saveConfigs',
+        method: 'post',
+        withCredentials: true,
+        data: configsData.arr
+      }).then(res => {
+        if (res.data.code == 200) {
+          loadConfigs();
+          console.log('保存成功');
+        } else {
+          alert(res.data.data);
+        }
+      })
+      ;
+    }
+
+    function deleteConfigs(index: number) {
+      if (allowDelete.value == false) return;
+      configsData.arr.splice(index, 1);
+      allowDelete.value = false;
+    }
+
+    function startEdit(config: Config, index: number) {
+      editVisible.value = true;
+      editIndex.value = index;
+      editedConfig.enabled = config.enabled;
+      editedConfig.name = config.name;
+      editedConfig.username = config.username;
+      editedConfig.password = config.password;
+      editedConfig.location = config.location;
+      editedConfig.region = config.region;
+      editedConfig.type = config.type;
+    }
+
+    function exitEdit() {
+      editVisible.value = false;
+    }
+
+    function finishEdit() {
+      if (editedConfig.username.trim() == '') {
+        alert('username不能为空哦');
+        return;
+      }
+      const deepCopy: Config = { ...editedConfig };
+      for (let i = 0; i < configsData.arr.length; i++) {
+        if (configsData.arr[i].username == deepCopy.username && i != editIndex.value) {
+          alert('发现username有重复, 再检查一下');
+          return;
+        }
+      }
+      configsData.arr.splice(editIndex.value, 1, deepCopy);
+      editVisible.value = false;
+    }
+
     loadConfigs();
 
     return {
-      addConfigs,
+      editedConfig,
+      editVisible,
+      allowDelete,
       newConfig,
       configsData,
-      loadConfigs
+      addConfigs,
+      deleteConfigs,
+      saveConfigs,
+      loadConfigs,
+      startEdit,
+      finishEdit,
+      exitEdit
     };
   }
 });
@@ -192,5 +322,10 @@ export default defineComponent({
 .ui.toggle.checkbox input:checked ~ .box:before,
 .ui.toggle.checkbox input:checked ~ label:before {
   background-color: #21BA45 !important;
+}
+
+.ui.slider.checkbox input:checked ~ .box:before,
+.ui.slider.checkbox input:checked ~ label:before {
+  background-color: red !important;
 }
 </style>
