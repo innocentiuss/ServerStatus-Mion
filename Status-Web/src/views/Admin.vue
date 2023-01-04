@@ -144,6 +144,7 @@
           <div class="ui small positive button" @click="saveConfigs">
             保存&应用
           </div>
+          <span v-if="modified"><b>←检测到有修改，点它生效</b></span>
           <div class="ui slider checkbox" style="margin-left: 10px">
             <input type="checkbox" name="newsletter" v-model="allowDelete">
             <label>允许删除:
@@ -175,6 +176,7 @@ export default defineComponent({
     const allowDelete = ref(false);
     const configsData = reactive<{ arr: Config[] }>({ arr: [] });
     const editIndex = ref(0);
+    const modified = ref(false);
 
     // 登录检查
     function checkLogin() {
@@ -202,6 +204,7 @@ export default defineComponent({
       }).then(res => {
         if (res.data.code == 200) {
           configsData.arr = JSON.parse(res.data.data);
+          modified.value = false;
         } else {
           alert('获取配置文件失败!');
         }
@@ -237,6 +240,12 @@ export default defineComponent({
         if (res.data.code == 200) {
           console.log('添加成功');
           loadConfigs();
+          newConfig.username = '';
+          newConfig.password = '';
+          newConfig.name = '';
+          newConfig.type = '';
+          newConfig.location = '';
+          newConfig.region = '';
         } else {
           alert(res.data.data);
         }
@@ -264,6 +273,8 @@ export default defineComponent({
       if (allowDelete.value == false) return;
       configsData.arr.splice(index, 1);
       allowDelete.value = false;
+      editVisible.value = false;
+      modified.value = true;
     }
 
     function startEdit(config: Config, index: number) {
@@ -296,6 +307,7 @@ export default defineComponent({
       }
       configsData.arr.splice(editIndex.value, 1, deepCopy);
       editVisible.value = false;
+      modified.value = true;
     }
 
     loadConfigs();
@@ -306,6 +318,7 @@ export default defineComponent({
       allowDelete,
       newConfig,
       configsData,
+      modified,
       addConfigs,
       deleteConfigs,
       saveConfigs,
