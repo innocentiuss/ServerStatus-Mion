@@ -16,8 +16,8 @@
 
 ## 使用
 
-### 服务端安装
-
+### 项目服务端部署
+##### 后端部署
 1 安装Java环境(如果已有请跳过这一步), 推荐JDK11
 
 ```
@@ -43,7 +43,7 @@ java -jar server-status-x.x.x.jar
 ```
 nohup java -jar server-status-x.x.x.jar &
 ```
-
+##### 前端部署
 5 Nginx或者其他Web服务器创建好网站后, 将下载下来的zip包中Web文件夹下所有内容拷贝到网站根目录中, 例如
 
 ```
@@ -63,7 +63,7 @@ location /api/ {
 
 即可正常运行~
 
-+ 后台管理页面为:http://yourDomain/admin
++ 后台管理页面为:http://yourwebsite/admin
 
 ##### 服务端可选配置
 
@@ -79,9 +79,9 @@ Netty服务器端口, 需要和客户端连接配置设置一致(默认48084端�
 java -jar ... --netty.server.port=xxx
 ```
 
-### 客户端安装
+### 客户端安装部署
 
-下载客户端后, 修改连接信息(user, password, server_ip)后使用Python3运行即可
+客户端仅一个文件，下载客户端后, 编辑里面的连接信息(user, password, server_ip)后使用Python3运行即可
 
 ```shell
 wget https://raw.githubusercontent.com/innocentiuss/ServerStatus-Bubble/main/Status-Client/status_client.py
