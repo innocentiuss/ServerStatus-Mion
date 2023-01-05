@@ -1,11 +1,14 @@
 package com.bubble.status.utils;
 
-import cn.hutool.core.io.FileUtil;
+import com.bubble.status.exceptions.CommonException;
 import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Slf4j
 public class IOUtil {
@@ -17,15 +20,20 @@ public class IOUtil {
     }
 
     public static String readJsonConfig(String jsonFileName) {
-        File file = new File(".", jsonFileName);
-        String jsonString;
-        // 适配从IDE下运行读文件与打成jar后读文件
+        Path filePath = Paths.get(jsonFileName);
+        byte[] fileBytes;
         try {
-            jsonString = FileUtil.readString(jsonFileName, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            jsonString = FileUtil.readString(file, StandardCharsets.UTF_8);
+            // 文件不存在时会先创建一个模板
+            if (!Files.exists(filePath)) {
+                byte[] templateBytes = Files.readAllBytes(Paths.get("src/main/resources/server_config.json"));
+                String templateContent = new String(templateBytes, StandardCharsets.UTF_8);
+                Files.write(filePath, templateContent.getBytes(StandardCharsets.UTF_8));
+            }
+            fileBytes = Files.readAllBytes(filePath);
+        } catch (IOException e) {
+            throw new CommonException(e.getMessage());
         }
-        return jsonString;
+        return new String(fileBytes, StandardCharsets.UTF_8);
     }
 
     public static void writeString2File(String toWrite, String fileName) throws IOException {
