@@ -27,8 +27,8 @@
         <th>设置</th>
       </tr>
       </thead>
-      <tbody>
-      <tr v-for="(config, index) in configsData.arr" :key="index">
+      <transition-group name="list" tag="tbody">
+      <tr v-for="(config, index) in configsData.arr" :key="config.username" class="list-item">
         <td class="collapsing">
           <div class="ui toggle checkbox">
             <input type="checkbox" v-model="config.enabled" disabled="disabled"><label></label>
@@ -45,7 +45,7 @@
           <div class="negative ui button" @click="deleteConfigs(index)">删除配置</div>
         </td>
       </tr>
-      <tr v-if="editVisible">
+      <tr v-if="editVisible" class="list-item" :key="1">
         <td>
           <div class="ui toggle checkbox">
             <input type="checkbox" v-model="editedConfig.enabled"><label></label>
@@ -90,7 +90,7 @@
           </div>
         </td>
       </tr>
-      <tr>
+      <tr :key="2">
         <td>
           <div class="ui toggle checkbox">
             <input type="checkbox" v-model="newConfig.enabled"><label></label>
@@ -127,23 +127,23 @@
           </div>
         </td>
         <td>
-          <div class="ui primary button" @click="addConfigs">
-            添加服务器
+          <div :class="addButtonClass" @click="addConfigs">
+            {{ addButtonText }}
           </div>
         </td>
       </tr>
-      </tbody>
+      </transition-group>
       <tfoot class="full-width">
       <tr>
         <th></th>
         <th colspan="7">
           <div class="ui buttons">
-            <div class="ui small button" @click="loadConfigs">
+            <div :class="reloadClass" @click="loadConfigs">
               放弃修改&重新加载配置
             </div>
             <div class="or"></div>
-            <div class="ui small positive button" @click="saveConfigs">
-              保存&应用
+            <div :class="saveButtonClass" @click="saveConfigs">
+              {{ saveButtonText }}
             </div>
           </div>
           <span v-if="modified"><b>←检测到有修改，点它生效</b></span>
@@ -164,7 +164,7 @@
 
 <script lang="ts">
 
-import { defineComponent, reactive, ref } from 'vue';
+import { computed, defineComponent, reactive, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { Config } from 'types/config';
@@ -179,11 +179,28 @@ export default defineComponent({
     const configsData = reactive<{ arr: Config[] }>({ arr: [] });
     const editIndex = ref(0);
     const modified = ref(false);
+    const saveLoading = ref(false);
+    const saveButtonText = ref('保存&应用');
+    const saveButtonClass = computed(() => {
+      if (saveButtonText.value === '保存成功√') return 'ui positive disabled button';
+      return saveLoading.value ? 'ui positive disabled loading button' : 'ui positive button';
+    });
+    const addLoading = ref(false);
+    const addButtonText = ref('添加服务器');
+    const addButtonClass = computed(() => {
+      if (addButtonText.value === '添加成功了√') return 'ui primary disabled button';
+      return addLoading.value ? 'ui primary disabled loading button' : 'ui primary button';
+    });
+    const reloadLoading = ref(false);
+    const reloadClass = computed(() => {
+      if (reloadLoading.value == true) return 'ui small disabled loading button';
+      return 'ui small button';
+    });
 
     // 登录检查
     function checkLogin() {
       axios({
-        url: 'http://' + host + ':' + port +'/api/checkLogin',
+        url: 'http://' + host + ':' + port + '/api/checkLogin',
         method: 'post',
         withCredentials: true
       }).then(res => {
@@ -197,17 +214,19 @@ export default defineComponent({
     checkLogin();
 
     // 数据装载
-
     function loadConfigs() {
+      reloadLoading.value = true;
       axios({
-        url: 'http://' + host + ':' + port +'/api/getConfigs',
+        url: 'http://' + host + ':' + port + '/api/getConfigs',
         method: 'get',
         withCredentials: true
       }).then(res => {
         if (res.data.code == 200) {
           configsData.arr = JSON.parse(res.data.data);
+          reloadLoading.value = false;
           modified.value = false;
         } else {
+          reloadLoading.value = false;
           alert('获取配置文件失败!');
         }
       });
@@ -233,8 +252,9 @@ export default defineComponent({
     });
 
     function addConfigs() {
+      addLoading.value = true;
       axios({
-        url: 'http://' + host + ':' + port +'/api/addConfig',
+        url: 'http://' + host + ':' + port + '/api/addConfig',
         method: 'post',
         withCredentials: true,
         data: newConfig
@@ -248,23 +268,35 @@ export default defineComponent({
           newConfig.type = '';
           newConfig.location = '';
           newConfig.region = '';
+          addLoading.value = false;
+          addButtonText.value = '添加成功了√';
+          setTimeout(() => {
+            addButtonText.value = '添加服务器';
+          }, 1000);
         } else {
           alert(res.data.data);
+          addLoading.value = false;
         }
       });
     }
 
     function saveConfigs() {
+      saveLoading.value = true;
       axios({
-        url: 'http://' + host + ':' + port +'/api/saveConfigs',
+        url: 'http://' + host + ':' + port + '/api/saveConfigs',
         method: 'post',
         withCredentials: true,
         data: configsData.arr
       }).then(res => {
         if (res.data.code == 200) {
+          saveLoading.value = false;
+          saveButtonText.value = '保存成功√';
           loadConfigs();
-          console.log('保存成功');
+          setTimeout(() => {
+            saveButtonText.value = '保存&应用';
+          }, 1000);
         } else {
+          saveLoading.value = false;
           alert(res.data.data);
         }
       })
@@ -321,6 +353,14 @@ export default defineComponent({
       newConfig,
       configsData,
       modified,
+      saveLoading,
+      saveButtonText,
+      saveButtonClass,
+      addLoading,
+      addButtonText,
+      addButtonClass,
+      reloadLoading,
+      reloadClass,
       addConfigs,
       deleteConfigs,
       saveConfigs,
@@ -342,5 +382,15 @@ export default defineComponent({
 .ui.slider.checkbox input:checked ~ .box:before,
 .ui.slider.checkbox input:checked ~ label:before {
   background-color: red !important;
+}
+.list-enter-active, .list-leave-active {
+  transition: all .5s;
+}
+.list-enter, .list-leave-to{
+  opacity: 0;
+  transform: translateX(30px);
+}
+.list-move {
+  transition: transform .5s;
 }
 </style>

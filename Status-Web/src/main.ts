@@ -2,8 +2,8 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import MyApp from './MyApp.vue';
 import { createRouter, createWebHistory } from 'vue-router';
-import Admin from '@/views/Admin.vue';
-import LoginView from '@/views/LoginView.vue';
+import Admin from '@/components/Admin.vue';
+import LoginView from '@/components/Login.vue';
 
 const routes = [
   { path: '/', component: App },
