@@ -7,6 +7,9 @@ Status-Server/target/
 ### Build files ###
 Status-Web/node_modules/
 Status-Web/dist/
+Status-Server/server_config.json
+Status-Server/.mvn/
+Status-Web/package-lock.json
 
 ### STS ###
 .apt_generated
