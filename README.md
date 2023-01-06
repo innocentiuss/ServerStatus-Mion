@@ -1,4 +1,4 @@
-# ServerStatus-Bubble
+# ServerStatus-Mion
 
 以Java为服务端实现的一款前后端分离服务器探针、云监控
 
