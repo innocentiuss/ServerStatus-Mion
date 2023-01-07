@@ -8,7 +8,15 @@
 
 客户端基于cppla/ServerStatus中Python客户端修改实现，无外部依赖
 
-## 目录说明
+##### Demo图片展示:
+
+![主界面1](https://s1.ax1x.com/2023/01/07/pSVJGff.png)
+
+![主界面2](https://s1.ax1x.com/2023/01/07/pSVJUXQ.png)
+
+![后台](https://s1.ax1x.com/2023/01/07/pSVYwvD.png)
+
+## 项目目录说明
 
 + Status-Client: Python客户端(需要Python3+版本)
 + Status-Server: Java服务端, 基于Maven构建
@@ -64,6 +72,10 @@ location /api/ {
 即可正常运行~
 
 + 后台管理页面为:http://yourwebsite/admin
+
+如果8080端口冲突了，启动jar包时可以添加参数`--server.port=xxxxx`
+
+同时在Nginx伪静态规则里面修改`proxy_pass`后面url的端口号即可
 
 ##### 服务端可选配置
 
