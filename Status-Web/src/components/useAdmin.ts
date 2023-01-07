@@ -1,10 +1,9 @@
-import { useRouter } from 'vue-router';
+
 import { computed, reactive, ref } from 'vue';
 import { Config, host, port } from '../../types/config';
 import axios from 'axios';
 
 
-export const router = useRouter();
 export const editVisible = ref(false);
 export const allowDelete = ref(false);
 export const configsData = reactive<{ arr: Config[] }>({ arr: [] });

@@ -14,6 +14,10 @@
         <li>修改和删除需要点击保存&应用，才能同步到配置文件并正式启用，添加不用</li>
       </ul>
     </div>
+    <div class="dimmable">
+      <div class="ui active inverted dimmer" v-if="loading">
+        <div class="ui text loader">Loading</div>
+      </div>
     <table class="ui compact celled table">
       <thead>
       <tr>
@@ -160,11 +164,12 @@
       </tfoot>
     </table>
   </div>
+  </div>
 </template>
 
 <script lang="ts">
 
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import {
   editedConfig,
   editVisible,
@@ -180,15 +185,17 @@ import {
   addButtonClass,
   reloadLoading,
   reloadClass,
-  router,
   addConfigs,loadConfigs, deleteConfigs, saveConfigs,
   startEdit, finishEdit, exitEdit, checkLogin
 } from '@/components/useAdmin';
+import { useRouter } from 'vue-router';
 
 
 export default defineComponent({
 
   setup() {
+    const router = useRouter();
+    const loading = ref(true);
     checkLogin().then(res => {
       if (res.data.code != 200) {
         alert('please login');
@@ -196,6 +203,7 @@ export default defineComponent({
       } else {
         // Call loadConfigs after checkLogin is finished
         loadConfigs();
+        loading.value = false;
       }
     });
     return {
@@ -213,6 +221,7 @@ export default defineComponent({
       addButtonClass,
       reloadLoading,
       reloadClass,
+      loading,
       addConfigs,
       deleteConfigs,
       saveConfigs,
