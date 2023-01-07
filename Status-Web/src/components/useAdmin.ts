@@ -30,15 +30,10 @@ export const reloadClass = computed(() => {
 
 // 登录检查
 export function checkLogin() {
-  axios({
+  return axios({
     url: 'http://' + host + ':' + port + '/api/checkLogin',
     method: 'post',
     withCredentials: true
-  }).then(res => {
-    if (res.data.code != 200) {
-      alert('请先登录');
-      router.push(res.data.data);
-    }
   });
 }
 

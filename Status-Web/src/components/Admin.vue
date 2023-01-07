@@ -180,6 +180,7 @@ import {
   addButtonClass,
   reloadLoading,
   reloadClass,
+  router,
   addConfigs,loadConfigs, deleteConfigs, saveConfigs,
   startEdit, finishEdit, exitEdit, checkLogin
 } from '@/components/useAdmin';
@@ -188,9 +189,15 @@ import {
 export default defineComponent({
 
   setup() {
-    checkLogin();
-    loadConfigs();
-
+    checkLogin().then(res => {
+      if (res.data.code != 200) {
+        alert('please login');
+        router.push(res.data.data);
+      } else {
+        // Call loadConfigs after checkLogin is finished
+        loadConfigs();
+      }
+    });
     return {
       editedConfig,
       editVisible,
