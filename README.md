@@ -1,10 +1,10 @@
-# ServerStatus-Bubble
+# ServerStatus-Mion
 
 以Java为服务端实现的一款前后端分离服务器探针、云监控
 
 前端基于cokemine/Hotaru_theme项目拓展, 使用Websocket替代HTTP实现通信, 使用Vue3、Typescript、Semantic UI, 新增后台管理页面, 可实现节点热添加/删除/编辑
 
-服务端基于Netty、非阻塞式IO方式实现
+服务端基于Netty、非阻塞式IO方式实现，性能更高效
 
 客户端基于cppla/ServerStatus中Python客户端修改实现，无外部依赖
 
@@ -32,7 +32,7 @@
 yum -y install java-11-openjdk.x86_64
 ```
 
-2 前往[release](https://github.com/innocentiuss/ServerStatus-Bubble/releases)下载最新版本后解压进入
+2 前往[release](https://github.com/innocentiuss/ServerStatus-Mion/releases)下载最新版本后解压进入
 
 ```
 unzip xxx.zip && cd xxx
