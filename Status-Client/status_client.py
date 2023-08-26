@@ -8,6 +8,7 @@ import errno
 import subprocess
 import threading
 from queue import Queue  # python3
+import sys, signal
 
 USER = ""
 PASSWORD = ""
@@ -141,6 +142,7 @@ def tupd():
     s = subprocess.check_output("ps -eLf|wc -l", shell=True)
     d = int(s[:-1]) - 2
     return t, u, p, d
+
 
 lostRate = {
     '10010': 0.0,
@@ -412,3 +414,12 @@ if __name__ == '__main__':
             if 's' in locals().keys():
                 del s
             time.sleep(3)
+
+
+def signal_handler(sig, frame):
+    print("接收到信号:", sig)
+    s.close()
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, signal_handler)
