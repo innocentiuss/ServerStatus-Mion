@@ -14,7 +14,7 @@
 
 ![主界面2](https://s1.ax1x.com/2023/01/07/pSVJUXQ.png)
 
-![后台](https://s1.ax1x.com/2023/01/07/pSVddnU.md.png)
+![后台](https://s1.ax1x.com/2023/01/07/pSV0olt.png)
 
 ## 项目目录说明
 
