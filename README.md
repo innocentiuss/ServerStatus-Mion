@@ -6,7 +6,9 @@
 
 服务端基于Netty、非阻塞式IO方式实现，性能更高效
 
-客户端基于cppla/ServerStatus中Python客户端修改实现，无外部依赖
+客户端（采集端）基于cppla/ServerStatus中Python客户端修改实现，无外部依赖 
+
+工作机制为：客户端运行在Linux系统上运行收集数据，并push到服务端，服务端整理后展示在前端 
 
 ##### Demo图片展示:
 
@@ -72,10 +74,6 @@ location /api/ {
 即可正常运行~
 
 + 后台管理页面为:http://yourwebsite/admin
-
-如果8080端口冲突了，启动jar包时可以添加参数`--server.port=xxxxx`
-
-同时在Nginx伪静态规则里面修改`proxy_pass`后面url的端口号即可
 
 ##### 服务端可选配置
 
