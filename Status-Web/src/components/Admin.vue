@@ -1,16 +1,16 @@
 <template>
   <div>
     <div class="ui teal dividing header" style="padding-top:10px;padding-left: 10px">
-      <div class="content">
+      <div class="content" @click="backToIndex">
         节点设置
-        <div class="sub header">Sub-header</div>
+        <div class="sub header">节点管理后台</div>
       </div>
     </div>
     <div class="ui warning message">
       <div class="header">注意事项</div>
       <ul class="list">
-        <li>国家那栏只能填写两个大写英文(例如美国就写US)，不然国旗会不能正常渲染</li>
-        <li>为防误点，删除节点配置前，先要打开最下面的允许删除开关，不然不会有反应</li>
+        <li>国家那栏只能填写两个大写英文(例如美国就写US,日本写JP)，不然国旗会不能正常渲染</li>
+        <li>为防误点，删除节点配置前，先要打开最下面的允许删除开关，不然按钮不会有反应</li>
         <li>修改和删除需要点击保存&应用，才能同步到配置文件并正式启用，添加不用</li>
       </ul>
     </div>
@@ -35,7 +35,7 @@
       <tr v-for="(config, index) in configsData.arr" :key="config.username" class="list-item">
         <td class="collapsing">
           <div class="ui toggle checkbox">
-            <input type="checkbox" v-model="config.enabled" disabled="disabled"><label></label>
+            <input type="checkbox" v-model="config.enabled"><label></label>
           </div>
         </td>
         <td>{{ config.name }}</td>
@@ -195,6 +195,9 @@ export default defineComponent({
 
   setup() {
     const router = useRouter();
+    const backToIndex = () => {
+      window.location.href = '/'
+    }
     const loading = ref(true);
     checkLogin().then(res => {
       if (res.data.code != 200) {
@@ -228,7 +231,8 @@ export default defineComponent({
       loadConfigs,
       startEdit,
       finishEdit,
-      exitEdit
+      exitEdit,
+      backToIndex
     };
   }
 });
@@ -253,5 +257,8 @@ export default defineComponent({
 }
 .list-move {
   transition: transform .5s;
+}
+.content {
+  cursor: pointer;
 }
 </style>
