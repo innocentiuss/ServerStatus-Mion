@@ -35,7 +35,7 @@
       <tr v-for="(config, index) in configsData.arr" :key="config.username" class="list-item">
         <td class="collapsing">
           <div class="ui toggle checkbox">
-            <input type="checkbox" v-model="config.enabled" disabled="disabled"><label></label>
+            <input type="checkbox" v-model="config.enabled" disabled="false"><label></label>
           </div>
         </td>
         <td>{{ config.name }}</td>

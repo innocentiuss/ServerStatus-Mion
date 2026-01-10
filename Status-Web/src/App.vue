@@ -46,7 +46,8 @@ export default defineComponent({
     };
 
     const host = window.location.hostname;
-    const ws = new WebSocket('ws://' + host + ':8080/connect');
+    const protocol = window.location.protocol;
+    const ws = new WebSocket(protocol == 'https:' ? 'wss://' : 'ws://' + host + ':8080/connect');
 
     ws.onmessage = (event: MessageEvent<string>) => {
       const data = event.data;
