@@ -10,7 +10,7 @@
 
 工作机制为：客户端运行在Linux系统上运行收集数据，并push到服务端，服务端整理后展示在前端 
 
-##### Demo图片展示:
+#### Demo图片展示:
 
 ![主界面1](https://s1.ax1x.com/2023/01/07/pSVJGff.png)
 
@@ -27,8 +27,8 @@
 ## 使用
 
 ### 项目服务端部署
-##### 后端部署
-1 安装Java环境(如果已有请跳过这一步), 推荐JDK11
+#### 后端部署
+1 安装Java环境(如果已有请跳过这一步), 推荐JDK11、17等, 下面以JDK11为例
 
 ```
 yum -y install java-11-openjdk.x86_64
@@ -54,20 +54,34 @@ java -jar server-status-x.x.x.jar
 nohup java -jar server-status-x.x.x.jar &
 ```
 ##### 前端部署
+
+>前端页面的部署可以与后端部署在同一台服务器, 也可以部署在不同服务器上
+
 5 Nginx或者其他Web服务器创建好网站后, 将下载下来的zip包中Web文件夹下所有内容拷贝到网站根目录中, 例如
 
 ```
 sudo cp -r web/* /home/wwwroot/yourwebsite
 ```
 
-6 添加伪静态设置, 这里以Nginx为例(其实包括了一个反向代理, 为了解决跨域问题)
+6 添加反向代理(伪静态)设置, 这里以Nginx为例, Nginx负责将请求转发到后端服务端
+
+>如果服务端与Nginx不在同一个服务器, 将localhost替换为服务端IP即可
 
 ```
+# 指定网站根目录为/index.html
 location / {
   try_files $uri $uri/ /index.html;
 }
+# 配置API转发到服务端
 location /api/ {
   proxy_pass http://localhost:8080/api/;
+}
+# 配置Websocket转发到服务端
+location /connect {
+  proxy_pass http://localhost:8080/connect;
+  proxy_http_version 1.1;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection "upgrade";
 }
 ```
 
@@ -75,7 +89,7 @@ location /api/ {
 
 + 后台管理页面为:http://yourwebsite/admin
 
-##### 服务端可选配置
+#### 服务端可选配置
 
 自定义配置文件名(需要在jar包同目录下)
 
