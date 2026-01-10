@@ -1,6 +1,6 @@
 
 import { computed, reactive, ref } from 'vue';
-import { Config, host, port } from '../../types/config';
+import { Config, host, port, protocol } from '../../types/config';
 import axios from 'axios';
 
 
@@ -30,7 +30,7 @@ export const reloadClass = computed(() => {
 // 登录检查
 export function checkLogin() {
   return axios({
-    url: 'http://' + host + ':' + port + '/api/checkLogin',
+    url: protocol + '//' + host + ':' + port + '/api/checkLogin',
     method: 'post',
     withCredentials: true
   });
@@ -40,7 +40,7 @@ export function checkLogin() {
 export function loadConfigs() {
   reloadLoading.value = true;
   axios({
-    url: 'http://' + host + ':' + port + '/api/getConfigs',
+    url: protocol + '//' + host + ':' + port + '/api/getConfigs',
     method: 'get',
     withCredentials: true
   }).then(res => {
@@ -77,7 +77,7 @@ export const editedConfig: Config = reactive({
 export function addConfigs() {
   addLoading.value = true;
   axios({
-    url: 'http://' + host + ':' + port + '/api/addConfig',
+    url: protocol + '//' + host + ':' + port + '/api/addConfig',
     method: 'post',
     withCredentials: true,
     data: newConfig
@@ -106,7 +106,7 @@ export function addConfigs() {
 export function saveConfigs() {
   saveLoading.value = true;
   axios({
-    url: 'http://' + host + ':' + port + '/api/saveConfigs',
+    url: protocol + '//' + host + ':' + port + '/api/saveConfigs',
     method: 'post',
     withCredentials: true,
     data: configsData.arr
