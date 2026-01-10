@@ -40,7 +40,7 @@ export function checkLogin() {
 export function loadConfigs() {
   reloadLoading.value = true;
   axios({
-    url: protocol + '//' host + ':' + port + '/api/getConfigs',
+    url: protocol + '//' + host + ':' + port + '/api/getConfigs',
     method: 'get',
     withCredentials: true
   }).then(res => {
