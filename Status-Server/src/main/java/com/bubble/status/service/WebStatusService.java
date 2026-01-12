@@ -70,6 +70,7 @@ public class WebStatusService {
 
     // 客户端传来的时间为秒数, 这里换算成天数
     private String uptimeSeconds2Day(String uptime) {
+        if (uptime == null) return "未知";
         long seconds = Long.parseLong(uptime);
         // 小于一天时, 换算成XX小时XX分XX秒
         // 小于1天 (86400秒)
@@ -87,16 +88,16 @@ public class WebStatusService {
 
     // 负载保留两位小数
     private void uptimeRound2(ServerInfoVo serverInfoVo) {
-        serverInfoVo.setLoad1(round(serverInfoVo.getLoad1(), 2));
-        serverInfoVo.setLoad5(round(serverInfoVo.getLoad5(), 2));
-        serverInfoVo.setLoad15(round(serverInfoVo.getLoad15(), 2));
+        if (serverInfoVo.getLoad1() != null) serverInfoVo.setLoad1(round(serverInfoVo.getLoad1(), 2));
+        if (serverInfoVo.getLoad5() != null) serverInfoVo.setLoad5(round(serverInfoVo.getLoad5(), 2));
+        if (serverInfoVo.getLoad15() != null) serverInfoVo.setLoad15(round(serverInfoVo.getLoad15(), 2));
     }
 
     // loss保留一位小数
     private void lossRound1(ServerInfoVo serverInfoVo) {
-        serverInfoVo.setLoss_189(round(serverInfoVo.getLoss_189(), 1));
-        serverInfoVo.setLoss_10010(round(serverInfoVo.getLoss_10010(), 1));
-        serverInfoVo.setLoss_10086(round(serverInfoVo.getLoss_10086(), 1));
+        if (serverInfoVo.getLoss_189() != null) serverInfoVo.setLoss_189(round(serverInfoVo.getLoss_189(), 1));
+        if (serverInfoVo.getLoss_10010() != null) serverInfoVo.setLoss_10010(round(serverInfoVo.getLoss_10010(), 1));
+        if (serverInfoVo.getLoss_10086() != null) serverInfoVo.setLoss_10086(round(serverInfoVo.getLoss_10086(), 1));
     }
 
     private double round(double value, int scale) {
