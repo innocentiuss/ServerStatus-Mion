@@ -1,9 +1,6 @@
 package com.bubble.status.service;
 
-import cn.hutool.core.date.BetweenFormatter;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.NumberUtil;
-import com.bubble.status.model.ServerInfo;
+import com.bubble.status.model.ServerOnlineInfo;
 import com.bubble.status.model.ServerInfoVo;
 import com.bubble.status.model.Status;
 import org.springframework.beans.BeanUtils;
@@ -11,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +31,14 @@ public class WebStatusService {
     Long disconnectTimeout;
 
     public List<ServerInfoVo> getInfosFromRestWeb() {
-        List<ServerInfo> configuredServers = configService.getConfiguredServers();
+        List<ServerOnlineInfo> configuredServers = configService.getConfiguredServers();
 
         List<ServerInfoVo> voList = new ArrayList<>(configuredServers.size());
         long now = System.currentTimeMillis() / 1000;
-        for (ServerInfo server : configuredServers) {
-            // 跳过配置中disabled了服务器
-            if (server.isDisabled()) continue;
+        for (ServerOnlineInfo server : configuredServers) {
+            // 跳过配置中disabled了服务器(不展示)
+            if (Boolean.TRUE.equals(server.getDisabled())) continue;
+            if (Boolean.FALSE.equals(server.getEnabled())) continue;
 
             // 先设置初始属性
             ServerInfoVo serverInfoVo = new ServerInfoVo();
@@ -70,25 +70,39 @@ public class WebStatusService {
 
     // 客户端传来的时间为秒数, 这里换算成天数
     private String uptimeSeconds2Day(String uptime) {
-        int time = Integer.parseInt(uptime);
+        if (uptime == null) return "未知";
+        long seconds = Long.parseLong(uptime);
         // 小于一天时, 换算成XX小时XX分XX秒
-        if (time < 86400)
-            return DateUtil.formatBetween((long) time * 1000L, BetweenFormatter.Level.SECOND);
+        // 小于1天 (86400秒)
+        if (seconds < 86400) {
+            long h = seconds / 3600;
+            long m = (seconds % 3600) / 60;
+            long s = seconds % 60;
+            return String.format("%d小时%d分%d秒", h, m, s);
+        }
 
-        return DateUtil.formatBetween((long) time * 1000L, BetweenFormatter.Level.HOUR);
+        long days = seconds / 86400;
+        long hours = (seconds % 86400) / 3600;
+        return String.format("%d天%d小时", days, hours);
     }
 
     // 负载保留两位小数
     private void uptimeRound2(ServerInfoVo serverInfoVo) {
-        serverInfoVo.setLoad1(NumberUtil.round(serverInfoVo.getLoad1(), 2).doubleValue());
-        serverInfoVo.setLoad5(NumberUtil.round(serverInfoVo.getLoad5(), 2).doubleValue());
-        serverInfoVo.setLoad15(NumberUtil.round(serverInfoVo.getLoad15(), 2).doubleValue());
+        if (serverInfoVo.getLoad1() != null) serverInfoVo.setLoad1(round(serverInfoVo.getLoad1(), 2));
+        if (serverInfoVo.getLoad5() != null) serverInfoVo.setLoad5(round(serverInfoVo.getLoad5(), 2));
+        if (serverInfoVo.getLoad15() != null) serverInfoVo.setLoad15(round(serverInfoVo.getLoad15(), 2));
     }
 
     // loss保留一位小数
     private void lossRound1(ServerInfoVo serverInfoVo) {
-        serverInfoVo.setLoss_189(NumberUtil.round(serverInfoVo.getLoss_189(), 1).doubleValue());
-        serverInfoVo.setLoss_10010(NumberUtil.round(serverInfoVo.getLoss_10010(), 1).doubleValue());
-        serverInfoVo.setLoss_10086(NumberUtil.round(serverInfoVo.getLoss_10086(), 1).doubleValue());
+        if (serverInfoVo.getLoss_189() != null) serverInfoVo.setLoss_189(round(serverInfoVo.getLoss_189(), 1));
+        if (serverInfoVo.getLoss_10010() != null) serverInfoVo.setLoss_10010(round(serverInfoVo.getLoss_10010(), 1));
+        if (serverInfoVo.getLoss_10086() != null) serverInfoVo.setLoss_10086(round(serverInfoVo.getLoss_10086(), 1));
+    }
+
+    private double round(double value, int scale) {
+        return new BigDecimal(Double.toString(value))
+                .setScale(scale, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 }

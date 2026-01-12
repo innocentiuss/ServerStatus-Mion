@@ -1,12 +1,11 @@
 package com.bubble.status.service;
 
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HttpStatus;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.bubble.status.exceptions.CommonException;
+import com.bubble.status.model.CommonWebResponse;
+import com.bubble.status.model.Configs;
+import com.bubble.status.utils.JsonUtil;
+import org.springframework.http.HttpStatus;
 import com.bubble.status.model.Login;
-import com.bubble.status.model.WebResponse;
 import com.bubble.status.utils.CheckUtil;
 import com.bubble.status.utils.IOUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +14,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 @Service
 public class LoginService {
@@ -36,11 +37,11 @@ public class LoginService {
                 && CheckUtil.isSame(settingLoginInfoMD5.getPassword(), loginInfo.getPassword())) {
 
             // 计算cookie值, 暂时定义为用户名+密码过完MD5后过一次sha1
-            String cookieVal = SecureUtil.sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword());
-            ServletUtil.addCookie(httpServletResponse, "isLogin", cookieVal, 1200, "/", null);
-            return new WebResponse("login ok", 200).toString();
+            String cookieVal = sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword());
+            addCookie(httpServletResponse, "isLogin", cookieVal, 1200, "/");
+            return new CommonWebResponse<>(200, "login ok").toString();
         }
-        return new WebResponse("login failed", 401).toString();
+        return new CommonWebResponse<>(401, "login failed").toString();
     }
 
     /**
@@ -50,9 +51,9 @@ public class LoginService {
      */
     public String checkLogin(HttpServletRequest request) {
         if (isLogin(request))
-            return new WebResponse("ok", HttpStatus.HTTP_OK).toString();
+            return new CommonWebResponse<>(HttpStatus.OK.value(), "ok").toString();
 
-        return new WebResponse("/login", HttpStatus.HTTP_TEMP_REDIRECT).toString();
+        return new CommonWebResponse<>("/login", HttpStatus.TEMPORARY_REDIRECT.value()).toString();
     }
 
     /**
@@ -62,10 +63,13 @@ public class LoginService {
     private Login getMD5LoginConfigInfo() {
         // 从配置文件拿数据
         String jsonString = IOUtil.readJsonConfig(configFileName);
-        CheckUtil.check(jsonString != null, "read config error!", HttpStatus.HTTP_INTERNAL_ERROR);
-        JSONObject loginInfoSet = JSON.parseObject(jsonString).getJSONObject("loginInfo");
-        String settingNameMD5 = SecureUtil.md5(loginInfoSet.getString("username"));
-        String settingPassMD5 = SecureUtil.md5(loginInfoSet.getString("password"));
+        Configs configs = JsonUtil.toObject(jsonString, Configs.class);
+        if (configs == null || configs.getLoginInfo() == null) {
+            throw new CommonException("配置文件缺少登录信息.");
+        }
+        Login login = configs.getLoginInfo();
+        String settingNameMD5 = md5(login.getUsername());
+        String settingPassMD5 = md5(login.getPassword());
         return new Login(settingNameMD5, settingPassMD5);
     }
 
@@ -77,11 +81,55 @@ public class LoginService {
     public boolean isLogin(HttpServletRequest request) {
         // 检查cookie是否正确
         Login settingLoginInfoMD5 = getMD5LoginConfigInfo();
-        Cookie cookie = ServletUtil.getCookie(request, "isLogin");
+        Cookie cookie = getCookie(request, "isLogin");
         return cookie != null &&
                 CheckUtil.isSame(
-                        SecureUtil.sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword()),
+                        sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword()),
                         cookie.getValue()
                 );
+    }
+
+    // 辅助工具方法
+    private void addCookie(HttpServletResponse response, String name, String value, int maxAge, String path) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setMaxAge(maxAge);
+        cookie.setPath(path);
+        // 如果需要，可以设置 cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+    }
+
+    private Cookie getCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
+                    return cookie;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String digest(String algorithm, String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance(algorithm);
+            byte[] bytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                // 转16进制
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String md5(String input) {
+        return digest("MD5", input);
+    }
+
+    private String sha1(String input) {
+        return digest("SHA-1", input);
     }
 }

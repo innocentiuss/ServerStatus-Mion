@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onBeforeUnmount, onUnmounted } from 'vue';
+import { defineComponent, ref, onUnmounted } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import TheError from '@/components/TheError.vue';
@@ -18,6 +18,7 @@ import ServersTable from '@/components/ServersTable.vue';
 import UpdateTime from '@/components/UpdateTime.vue';
 import ServersCard from '@/components/ServersCard.vue';
 import TheFooter from '@/components/TheFooter.vue';
+import { host, port, protocol } from '../types/config';
 
 export default defineComponent({
   name: 'App',
@@ -32,8 +33,6 @@ export default defineComponent({
   setup() {
     const servers = ref<Array<StatusItem | BoxItem>>();
     const updated = ref<number>();
-    const { interval } = window.__PRE_CONFIG__;
-    let timer: number;
 
     const handleMessage = (data: string) => {
       try {
@@ -45,28 +44,16 @@ export default defineComponent({
       }
     };
 
-    const host = window.location.hostname;
-    const protocol = window.location.protocol;
     const wsProtocol = protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${wsProtocol}://${host}/connect`);
+    const ws = new WebSocket(`${wsProtocol}://${host}:${port}/connect`);
 
+    ws.onopen = () => {
+      console.log('Connected via WebSocket!');
+    };
     ws.onmessage = (event: MessageEvent<string>) => {
       const data = event.data;
       handleMessage(data);
     };
-    const getInfo = () => {
-      if (ws.readyState != 1) return;
-      ws.send(JSON.stringify({ msg: 'get' }));
-      console.log('getting data..');
-    };
-
-    onMounted(() => {
-      getInfo();
-      timer = setInterval(getInfo, interval * 1000);
-    });
-    onBeforeUnmount(() => {
-      clearInterval(timer);
-    });
     onUnmounted(() => {
       ws.close();
     });

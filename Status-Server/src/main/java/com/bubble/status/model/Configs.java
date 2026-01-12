@@ -8,5 +8,5 @@ import java.util.List;
 @Data
 public class Configs {
     private Login loginInfo;
-    private List<ConfigInfo> servers;
+    private List<ServerConfigInfo> servers;
 }

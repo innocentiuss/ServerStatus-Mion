@@ -3,11 +3,13 @@ package com.bubble.status.model;
 import lombok.Data;
 
 @Data
-public class ServerInfoVo extends Status{
+public class ServerConfigInfo {
+    private Boolean disabled;
+    private String username;
+    private String password;
     private String name;
     private String type;
     private String location;
-    private boolean isOnline;
-    private boolean lost = false;
     private String region;
+    private Boolean enabled;
 }

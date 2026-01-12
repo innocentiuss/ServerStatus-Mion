@@ -23,17 +23,17 @@
     "@types/axios": "^0.14.0",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
-    "@vue/cli-plugin-babel": "~4.5.11",
-    "@vue/cli-plugin-eslint": "~4.5.11",
-    "@vue/cli-plugin-typescript": "^4.5.11",
-    "@vue/cli-service": "~4.5.11",
+    "@vue/cli-plugin-babel": "^5.x",
+    "@vue/cli-plugin-eslint": "^5.x",
+    "@vue/cli-plugin-typescript": "^5.x",
+    "@vue/cli-service": "^5.x",
     "@vue/compiler-sfc": "^3.0.5",
     "@vue/eslint-config-typescript": "^7.0.0",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.19.0",
+    "eslint": "^7.32.0",
     "eslint-plugin-vue": "^7.5.0",
     "svg-sprite-loader": "^6.0.7",
-    "typescript": "~4.1.3"
+    "typescript": "^4.9 || ^5.x"
   },
   "browserslist": [
     "> 1%",

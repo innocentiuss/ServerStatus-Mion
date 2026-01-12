@@ -1,44 +1,54 @@
 package com.bubble.status.controller.ws;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.bubble.status.config.SpringContext;
-import com.bubble.status.model.Result;
-import com.bubble.status.model.ServerInfoVo;
-import com.bubble.status.service.WebStatusService;
-import com.bubble.status.utils.CheckUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 
-import javax.websocket.OnMessage;
+import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Slf4j
 @Component
 @ServerEndpoint(value = "/connect")
 public class WebSocketHandler {
 
-    WebStatusService webStatusService = SpringContext.getBean(WebStatusService.class);
+    // 使用线程安全的 Set 存储所有连接的会话
+    private static final CopyOnWriteArraySet<Session> sessions = new CopyOnWriteArraySet<>();
 
+    @OnOpen
+    public void onOpen(Session session) {
+        sessions.add(session);
+        log.info("New connection, id: {}", session.getId());
+    }
+
+    @OnClose
+    public void onClose(Session session) {
+        sessions.remove(session);
+        log.info("Connection closed, id: {}", session.getId());
+    }
+
+    @OnError
+    public void onError(Session session, Throwable error) {
+        sessions.remove(session);
+        log.error("WebSocket error", error);
+    }
 
     @OnMessage
-    public String onMsg(String message) {
-        try {
-            JSONObject jsonObject = JSONObject.parseObject(message);
-            if (CheckUtil.isSame(jsonObject.getString("msg"), "get")) {
-                return getInfos();
+    public void onMessage(String message, Session session) {
+        log.debug("Received message from client. id: {} message: {}", session.getId(), message);
+    }
+
+    public static void sendToAllClients(String message) {
+        for (Session session : sessions) {
+            if (session.isOpen()) {
+                // 使用 getAsyncRemote() 非阻塞发送
+                session.getAsyncRemote().sendText(message);
             }
-            return "{code:400, msg:\"cannot handle message\"}";
-        } catch (Exception e) {
-            return "{code:400, msg:\"unknown message\"}";
         }
     }
 
-    private String getInfos() {
-        List<ServerInfoVo> voList = webStatusService.getInfosFromRestWeb();
-        Result result = new Result(voList, (int) (System.currentTimeMillis() / 1000L));
-        return JSON.toJSONString(result);
+    public static boolean noActiveSession() {
+        return sessions.isEmpty();
     }
 }
