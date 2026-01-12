@@ -1,14 +1,13 @@
 package com.bubble.status.service;
 
 
-import cn.hutool.http.HttpStatus;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.bubble.status.utils.JsonUtil;
+import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
 import com.bubble.status.exceptions.CommonException;
-import com.bubble.status.model.ConfigInfo;
+import com.bubble.status.model.ServerConfigInfo;
 import com.bubble.status.model.Configs;
-import com.bubble.status.model.ServerInfo;
+import com.bubble.status.model.ServerOnlineInfo;
 import com.bubble.status.utils.CheckUtil;
 import com.bubble.status.utils.IOUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,7 @@ public class ConfigService implements InitializingBean {
 
     // 保存所有服务器连接信息
     // key: service username
-    Map<String, ServerInfo> configuredServers;
+    volatile Map<String, ServerOnlineInfo> configuredServers;
 
     @Value("${server.config}")
     private String configFileName;
@@ -40,7 +39,7 @@ public class ConfigService implements InitializingBean {
         loadConfigs();
     }
 
-    public ServerInfo getInfoFromUsername(String username) {
+    public ServerOnlineInfo getInfoFromUsername(String username) {
         return configuredServers.get(username);
     }
 
@@ -50,22 +49,24 @@ public class ConfigService implements InitializingBean {
     private void loadConfigs() {
         // 为了解决热加载后, 所有online都变成默认的false了
         // 先保留下加载之前的online信息
-        Map<String, ServerInfo> oldMap = configuredServers;
-
-        configuredServers = new ConcurrentHashMap<>();
+        Map<String, ServerOnlineInfo> oldMap = configuredServers;
+        Map<String, ServerOnlineInfo> newMap = new ConcurrentHashMap<>();
 
         String jsonString = IOUtil.readJsonConfig(configFileName);
-        JSONArray serversJson = JSON.parseObject(jsonString).getJSONArray("servers");
+        Configs configsWrapper = JsonUtil.toObject(jsonString, Configs.class);
+        List<ServerConfigInfo> configServers = configsWrapper.getServers();
 
-        for (int i = 0; i < serversJson.size(); i++) {
-            ServerInfo serverInfo = serversJson.getObject(i, ServerInfo.class);
+        configServers.forEach(serverConfigInfo -> {
+            ServerOnlineInfo serverInfo = new ServerOnlineInfo();
+            BeanUtils.copyProperties(serverConfigInfo, serverInfo);
 
-            if (configuredServers.containsKey(serverInfo.getUsername()))
-                throw new CommonException("配置文件中出现重复username, 检查一下吧");
+            if (newMap.containsKey(serverInfo.getUsername())) {
+                throw new CommonException("配置文件中出现重复username: " + serverInfo.getUsername());
+            }
 
 
             // 替换时, 先同步下连接信息, 不然的话会影响后面的继续更新数据
-            ServerInfo oldInfo = oldMap.get(serverInfo.getUsername());
+            ServerOnlineInfo oldInfo = oldMap.get(serverInfo.getUsername());
             if (oldInfo != null) {
                 serverInfo.setOnline(oldInfo.isOnline());
                 serverInfo.setHost(oldInfo.getHost());
@@ -73,8 +74,9 @@ public class ConfigService implements InitializingBean {
                 serverInfo.setConnectedPort(oldInfo.getConnectedPort());
             }
 
-            configuredServers.put(serverInfo.getUsername(), serverInfo);
-        }
+            newMap.put(serverInfo.getUsername(), serverInfo);
+        });
+        configuredServers = newMap;
     }
 
     public synchronized void refreshConfig() throws IOException {
@@ -86,9 +88,9 @@ public class ConfigService implements InitializingBean {
      *
      * @return 列表
      */
-    public List<ServerInfo> getConfiguredServers() {
-        List<ServerInfo> result = new ArrayList<>(configuredServers.size());
-        for (Map.Entry<String, ServerInfo> entry : configuredServers.entrySet()) {
+    public List<ServerOnlineInfo> getConfiguredServers() {
+        List<ServerOnlineInfo> result = new ArrayList<>(configuredServers.size());
+        for (Map.Entry<String, ServerOnlineInfo> entry : configuredServers.entrySet()) {
             result.add(entry.getValue());
         }
         return result;
@@ -100,51 +102,69 @@ public class ConfigService implements InitializingBean {
      */
     public String getAllConfigs() {
         String jsonString = IOUtil.readJsonConfig(configFileName);
-        JSONArray serversJson = JSON.parseObject(jsonString).getJSONArray("servers");
+        Configs configsWrapper = JsonUtil.toObject(jsonString, Configs.class);
+        List<ServerConfigInfo> servers = configsWrapper.getServers();
 
-        List<ConfigInfo> configs = new ArrayList<>();
-        for (int i = 0; i < serversJson.size(); i++) {
-            ConfigInfo vo = serversJson.getObject(i, ConfigInfo.class);
-            vo.setEnabled(!vo.isDisabled());
-            configs.add(vo);
+        if (servers != null) {
+            for (ServerConfigInfo vo : servers) {
+                // 处理 enabled/disabled 状态
+                if (vo.getDisabled() != null) {
+                    vo.setEnabled(!vo.getDisabled());
+                } else if (vo.getEnabled() != null) {
+                    vo.setDisabled(!vo.getEnabled());
+                } else {
+                    vo.setEnabled(true);
+                    vo.setDisabled(false);
+                }
+            }
         }
-
-        return JSON.toJSONString(configs);
+        return JsonUtil.toJson(servers);
     }
 
     /**
      * 添加单个配置加入到文件中
-     * @param configInfo 待添加信息
+     * @param serverConfigInfo 待添加信息
      */
-    public synchronized void proceedingAddConfig(ConfigInfo configInfo) throws IOException {
+    public synchronized void proceedingAddConfig(ServerConfigInfo serverConfigInfo) throws IOException {
         Configs configs = readConfigsFromFile();
         // 添加新设置
-        List<ConfigInfo> servers = configs.getServers();
-        CheckUtil.check(servers != null, "server_config.json格式似乎有问题, 检查一下吧", HttpStatus.HTTP_INTERNAL_ERROR);
-        CheckUtil.check(configInfo.getUsername() != null && !configInfo.getUsername().equals(""), "用户名不能空着的呢", HttpStatus.HTTP_BAD_REQUEST);
-        CheckUtil.check(usernameIsNotDuplicated(servers, configInfo), "配置的用户名重复啦", HttpStatus.HTTP_BAD_REQUEST);
-        servers.add(configInfo);
+        List<ServerConfigInfo> servers = configs.getServers();
+        CheckUtil.check(servers != null, "server_config.json格式似乎有问题, 检查一下吧", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        CheckUtil.check(serverConfigInfo.getUsername() != null && !serverConfigInfo.getUsername().equals(""), "用户名不能空着的呢", HttpStatus.BAD_REQUEST.value());
+        CheckUtil.check(usernameIsNotDuplicated(servers, serverConfigInfo), "配置的用户名重复啦", HttpStatus.BAD_REQUEST.value());
+        if (serverConfigInfo.getEnabled() != null) {
+            serverConfigInfo.setDisabled(!serverConfigInfo.getEnabled());
+        }
+        servers.add(serverConfigInfo);
 
         // 序列化并保存
-        IOUtil.writeString2File(JSON.toJSONString(configs, SerializerFeature.PrettyFormat), configFileName);
+        IOUtil.writeString2File(JsonUtil.toJson(configs), configFileName);
         refreshConfig();
-        log.info("成功添加新服务器配置啦: username=" + configInfo.getUsername());
+        log.info("成功添加新服务器配置啦: username=" + serverConfigInfo.getUsername());
     }
 
     /**
      * 将前端设置的状态保存并应用
-     * @param configInfos 保存目标
+     * @param serverConfigInfos 保存目标
      */
-    public synchronized void proceedingSaveConfig(List<ConfigInfo> configInfos) throws IOException {
+    public synchronized void proceedingSaveConfig(List<ServerConfigInfo> serverConfigInfos) throws IOException {
         // 检查不存在空属性
-        CheckUtil.check(notExistEmptyAttribute(configInfos), "有用户名或密码为空, 拒绝修改啦", HttpStatus.HTTP_BAD_REQUEST);
+        CheckUtil.check(notExistEmptyAttribute(serverConfigInfos), "有用户名或密码为空, 拒绝修改啦", HttpStatus.BAD_REQUEST.value());
         // 检查没重复username
-        CheckUtil.check(usernameIsNotDuplicated(configInfos), "配置的用户名重复啦", HttpStatus.HTTP_BAD_REQUEST);
+        CheckUtil.check(usernameIsNotDuplicated(serverConfigInfos), "配置的用户名重复啦", HttpStatus.BAD_REQUEST.value());
         // 序列化成json并写入
         Configs configs = readConfigsFromFile();
-        configs.setServers(configInfos);
 
-        IOUtil.writeString2File(JSON.toJSONString(configs, SerializerFeature.PrettyFormat), configFileName);
+        // enabled disabled转换
+        serverConfigInfos.forEach(info -> {
+            if (info.getEnabled() != null) {
+                info.setDisabled(!info.getEnabled());
+            }
+        });
+
+        configs.setServers(serverConfigInfos);
+
+        IOUtil.writeString2File(JsonUtil.toPrettyJson(configs), configFileName);
         refreshConfig();
         log.info("保存服务器配置成功啦");
     }
@@ -159,44 +179,44 @@ public class ConfigService implements InitializingBean {
         // 反序列化
         Configs configs;
         try {
-            configs = JSON.parseObject(jsonString, Configs.class);
+            configs = JsonUtil.toObject(jsonString, Configs.class);
         } catch (Exception e) {
-            throw new CommonException("server_config.json格式似乎有问题, 检查一下吧", HttpStatus.HTTP_INTERNAL_ERROR);
+            throw new CommonException("server_config.json格式似乎有问题, 检查一下吧", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
         return configs;
     }
 
     /**
      * 检查配置文件用户名是否重复
-     * @param configInfoList 反序列化后配置List
-     * @param configInfo 待添加的配置
+     * @param serverConfigInfoList 反序列化后配置List
+     * @param serverConfigInfo 待添加的配置
      * @return ture: 没重复; false: 重复了
      */
-    private boolean usernameIsNotDuplicated(List<ConfigInfo> configInfoList, ConfigInfo configInfo) {
-        for (ConfigInfo info : configInfoList) {
-            if (info.getUsername().equals(configInfo.getUsername())) return false;
+    private boolean usernameIsNotDuplicated(List<ServerConfigInfo> serverConfigInfoList, ServerConfigInfo serverConfigInfo) {
+        for (ServerConfigInfo info : serverConfigInfoList) {
+            if (info.getUsername().equals(serverConfigInfo.getUsername())) return false;
         }
         return true;
     }
 
     /**
      * 检查用户名是否重复
-     * @param configInfoList 现有配置文件, 从json数组反序列化过来的
+     * @param serverConfigInfoList 现有配置文件, 从json数组反序列化过来的
      * @return ture: 没重复; false: 重复了
      */
-    private boolean usernameIsNotDuplicated(List<ConfigInfo> configInfoList) {
-        return configInfoList.stream().map(ConfigInfo::getUsername).collect(Collectors.toSet()).size() == configInfoList.size();
+    private boolean usernameIsNotDuplicated(List<ServerConfigInfo> serverConfigInfoList) {
+        return serverConfigInfoList.stream().map(ServerConfigInfo::getUsername).collect(Collectors.toSet()).size() == serverConfigInfoList.size();
     }
 
     /**
      * 校验配置文件不存在空用户名和密码
-     * @param configInfoList 现有配置文件, 从json数组反序列化过来的
+     * @param serverConfigInfoList 现有配置文件, 从json数组反序列化过来的
      * @return ture: 全有值; false: 有空值
      */
-    private boolean notExistEmptyAttribute(List<ConfigInfo> configInfoList) {
-        for (ConfigInfo configInfo : configInfoList) {
-            if (configInfo.getUsername() == null || configInfo.getUsername().equals("") ||
-                    configInfo.getPassword() == null || configInfo.getPassword().equals("")) return false;
+    private boolean notExistEmptyAttribute(List<ServerConfigInfo> serverConfigInfoList) {
+        for (ServerConfigInfo serverConfigInfo : serverConfigInfoList) {
+            if (serverConfigInfo.getUsername() == null || serverConfigInfo.getUsername().equals("") ||
+                    serverConfigInfo.getPassword() == null || serverConfigInfo.getPassword().equals("")) return false;
         }
         return true;
     }

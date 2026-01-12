@@ -1,11 +1,11 @@
 package com.bubble.status.exceptions;
 
-import cn.hutool.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 
 
 public class CommonException extends RuntimeException{
     private String message;
-    private int httpCode = HttpStatus.HTTP_INTERNAL_ERROR;
+    private int httpCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
 
     public CommonException(String message) {
         super(message);

@@ -21,7 +21,7 @@
     <table class="ui compact celled table">
       <thead>
       <tr>
-        <th>启用</th>
+        <th>展示</th>
         <th>节点名(name)</th>
         <th>类型(type)</th>
         <th>地点(location)</th>
