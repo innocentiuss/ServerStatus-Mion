@@ -97,7 +97,7 @@ export function addConfigs() {
         addButtonText.value = '添加服务器';
       }, 1000);
     } else {
-      alert(res.data.data);
+      alert(res.data.msg);
       addLoading.value = false;
     }
   });
@@ -120,7 +120,7 @@ export function saveConfigs() {
       }, 1000);
     } else {
       saveLoading.value = false;
-      alert(res.data.data);
+      alert(res.data.msg);
     }
   })
   ;

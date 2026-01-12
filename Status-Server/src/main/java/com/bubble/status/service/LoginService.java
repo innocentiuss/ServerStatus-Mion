@@ -39,9 +39,9 @@ public class LoginService {
             // 计算cookie值, 暂时定义为用户名+密码过完MD5后过一次sha1
             String cookieVal = sha1(settingLoginInfoMD5.getUsername() + settingLoginInfoMD5.getPassword());
             addCookie(httpServletResponse, "isLogin", cookieVal, 1200, "/");
-            return new CommonWebResponse<>("login ok", 200).toString();
+            return new CommonWebResponse<>(200, "login ok").toString();
         }
-        return new CommonWebResponse<>("login failed", 401).toString();
+        return new CommonWebResponse<>(401, "login failed").toString();
     }
 
     /**
@@ -51,9 +51,9 @@ public class LoginService {
      */
     public String checkLogin(HttpServletRequest request) {
         if (isLogin(request))
-            return new CommonWebResponse<>("ok", HttpStatus.OK.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.OK.value(), "ok").toString();
 
-        return new CommonWebResponse<>("/login", HttpStatus.TEMPORARY_REDIRECT.value()).toString();
+        return new CommonWebResponse<>(HttpStatus.TEMPORARY_REDIRECT.value(), "/login").toString();
     }
 
     /**

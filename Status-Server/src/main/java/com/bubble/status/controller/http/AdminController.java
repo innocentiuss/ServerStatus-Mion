@@ -31,7 +31,7 @@ public class AdminController {
         try {
             return loginService.doLogin(loginInfo, httpServletResponse);
         } catch (Exception e) {
-            return new CommonWebResponse<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()).toString();
         }
     }
 
@@ -40,7 +40,7 @@ public class AdminController {
         try {
             return loginService.checkLogin(httpServletRequest);
         } catch (Exception e) {
-            return new CommonWebResponse<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()).toString();
         }
     }
 
@@ -49,7 +49,7 @@ public class AdminController {
         try {
             return new CommonWebResponse<>(configService.getAllConfigs(), HttpStatus.OK.value()).toString();
         } catch (Exception e) {
-            return new CommonWebResponse<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()).toString();
         }
     }
 
@@ -58,9 +58,9 @@ public class AdminController {
         try {
             configService.refreshConfig();
         } catch (ConfigErrorException | IOException exception) {
-            return new CommonWebResponse<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()).toString();
         }
-        return new CommonWebResponse<>("ok", HttpStatus.OK.value()).toString();
+        return new CommonWebResponse<>(null, HttpStatus.OK.value()).toString();
     }
 
     @PostMapping("/addConfig")
@@ -70,9 +70,9 @@ public class AdminController {
             configService.proceedingAddConfig(serverConfigInfo);
             return new CommonWebResponse<>("添加成功", HttpStatus.OK.value()).toString();
         } catch (CommonException e) {
-            return new CommonWebResponse<>(e.getMessage(), e.getHttpCode()).toString();
+            return new CommonWebResponse<>(e.getHttpCode(), e.getMessage()).toString();
         } catch (Exception e) {
-            return new CommonWebResponse<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()).toString();
         }
     }
 
@@ -83,9 +83,9 @@ public class AdminController {
             configService.proceedingSaveConfig(serverConfigInfos);
             return new CommonWebResponse<>("添加成功", HttpStatus.OK.value()).toString();
         } catch (CommonException e) {
-            return new CommonWebResponse<>(e.getMessage(), e.getHttpCode()).toString();
+            return new CommonWebResponse<>(e.getHttpCode(), e.getMessage()).toString();
         } catch (Exception e) {
-            return new CommonWebResponse<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()).toString();
         }
     }
 }

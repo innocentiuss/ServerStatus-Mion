@@ -32,8 +32,6 @@ export default defineComponent({
   setup() {
     const servers = ref<Array<StatusItem | BoxItem>>();
     const updated = ref<number>();
-    const { interval } = window.__PRE_CONFIG__;
-    let timer: number;
 
     const handleMessage = (data: string) => {
       try {
@@ -50,23 +48,13 @@ export default defineComponent({
     const wsProtocol = protocol === 'https:' ? 'wss' : 'ws';
     const ws = new WebSocket(`${wsProtocol}://${host}/connect`);
 
+    ws.onopen = () => {
+      console.log('Connected via WebSocket!');
+    };
     ws.onmessage = (event: MessageEvent<string>) => {
       const data = event.data;
       handleMessage(data);
     };
-    const getInfo = () => {
-      if (ws.readyState != 1) return;
-      ws.send(JSON.stringify({ msg: 'get' }));
-      console.log('getting data..');
-    };
-
-    onMounted(() => {
-      getInfo();
-      timer = setInterval(getInfo, interval * 1000);
-    });
-    onBeforeUnmount(() => {
-      clearInterval(timer);
-    });
     onUnmounted(() => {
       ws.close();
     });

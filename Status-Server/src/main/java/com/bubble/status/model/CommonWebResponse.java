@@ -16,6 +16,11 @@ public class CommonWebResponse<T> {
         this.code = code;
     }
 
+    public CommonWebResponse(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
     @Override
     public String toString() {
         return JsonUtil.toJson(this);
