@@ -38,60 +38,63 @@
             <input type="checkbox" v-model="config.enabled"><label></label>
           </div>
         </td>
-        <td>{{ config.name }}</td>
-        <td>{{ config.type }}</td>
-        <td>{{ config.location }}</td>
-        <td>{{ config.username }}</td>
-        <td>{{ config.password }}</td>
-        <td>{{ config.region }}</td>
         <td>
-          <div class="ui teal button" @click="startEdit(config, index)">修改配置</div>
-          <div class="negative ui button" @click="deleteConfigs(index)">删除配置</div>
-        </td>
-      </tr>
-      <tr v-if="editVisible" class="list-item" :key="1">
-        <td>
-          <div class="ui toggle checkbox">
-            <input type="checkbox" v-model="editedConfig.enabled"><label></label>
-          </div>
+          <template v-if="config._editing">
+            <div class="ui input"><input type="text" v-model="config.name" /></div>
+          </template>
+          <template v-else>
+            {{ config.name }}
+          </template>
         </td>
         <td>
-          <div class="ui input">
-            <input type="text" placeholder="展示的节点名" v-model="editedConfig.name">
-          </div>
+          <template v-if="config._editing">
+            <div class="ui input"><input type="text" v-model="config.type" /></div>
+          </template>
+          <template v-else>
+            {{ config.type }}
+          </template>
         </td>
         <td>
-          <div class="ui input">
-            <input type="text" placeholder="虚拟化类型/服务商类型" v-model="editedConfig.type">
-          </div>
+          <template v-if="config._editing">
+            <div class="ui input"><input type="text" v-model="config.location" /></div>
+          </template>
+          <template v-else>
+            {{ config.location }}
+          </template>
         </td>
         <td>
-          <div class="ui input">
-            <input type="text" placeholder="所在城市/州" v-model="editedConfig.location">
-          </div>
+          <template v-if="config._editing">
+            <div class="ui input"><input type="text" v-model="config.username" /></div>
+          </template>
+          <template v-else>
+            {{ config.username }}
+          </template>
         </td>
         <td>
-          <div class="ui input">
-            <input type="text" placeholder="连接的用户名" v-model="editedConfig.username">
-          </div>
+          <template v-if="config._editing">
+            <div class="ui input"><input type="text" v-model="config.password" /></div>
+          </template>
+          <template v-else>
+            {{ config.password }}
+          </template>
         </td>
         <td>
-          <div class="ui input">
-            <input type="text" placeholder="连接的密码" v-model="editedConfig.password">
-          </div>
+          <template v-if="config._editing">
+            <div class="ui input"><input type="text" v-model="config.region" /></div>
+          </template>
+          <template v-else>
+            {{ config.region }}
+          </template>
         </td>
         <td>
-          <div class="ui input">
-            <input type="text" placeholder="用于渲染国旗" v-model="editedConfig.region">
-          </div>
-        </td>
-        <td>
-          <div class="ui positive button" @click="finishEdit">
-            编辑完成
-          </div>
-          <div class="ui button" @click="exitEdit">
-            放弃编辑
-          </div>
+          <template v-if="config._editing">
+            <button class="ui positive button" @click="finishEdit(index)">编辑完成</button>
+            <button class="ui button" @click="cancelEdit(index)">放弃编辑</button>
+          </template>
+          <template v-else>
+            <button class="ui teal button" @click="startEdit(index)">修改配置</button>
+            <button class="negative ui button" @click="deleteConfigs(index)">删除配置</button>
+          </template>
         </td>
       </tr>
       <tr :key="2">
@@ -150,13 +153,16 @@
               {{ saveButtonText }}
             </div>
           </div>
-          <span v-if="modified"><b>←检测到有修改，点它生效</b></span>
+          <span v-if="modified"><b>←如果有修改，点它生效</b></span>
           <div class="ui slider checkbox" style="margin-left: 10px">
             <input type="checkbox" name="newsletter" v-model="allowDelete">
             <label>允许删除:
-              <span v-bind:style="{ fontWeight: allowDelete ? 'bold' : 'normal' }">
-              {{ allowDelete ? '是' : '否' }}
-            </span>
+              <span 
+                v-bind:style="{ fontWeight: allowDelete ? 'bold' : 'normal' }"
+                :class="{ 'warning-animation': showWarning }"
+              >
+                {{ allowDelete ? '是' : '否' }}
+              </span>
             </label>
           </div>
         </th>
@@ -171,8 +177,6 @@
 
 import { defineComponent, ref } from 'vue';
 import {
-  editedConfig,
-  editVisible,
   allowDelete,
   newConfig,
   configsData,
@@ -185,8 +189,9 @@ import {
   addButtonClass,
   reloadLoading,
   reloadClass,
+  cancelEdit,
   addConfigs,loadConfigs, deleteConfigs, saveConfigs,
-  startEdit, finishEdit, exitEdit, checkLogin
+  startEdit, finishEdit, checkLogin, showWarning
 } from '@/components/useAdmin';
 import { useRouter } from 'vue-router';
 
@@ -196,8 +201,8 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const backToIndex = () => {
-      window.location.href = '/'
-    }
+      window.location.href = '/';
+    };
     const loading = ref(true);
     checkLogin().then(res => {
       if (res.data.code != 200) {
@@ -209,9 +214,8 @@ export default defineComponent({
         loading.value = false;
       }
     });
+    
     return {
-      editedConfig,
-      editVisible,
       allowDelete,
       newConfig,
       configsData,
@@ -231,8 +235,9 @@ export default defineComponent({
       loadConfigs,
       startEdit,
       finishEdit,
-      exitEdit,
-      backToIndex
+      cancelEdit,
+      backToIndex,
+      showWarning
     };
   }
 });
@@ -260,5 +265,36 @@ export default defineComponent({
 }
 .content {
   cursor: pointer;
+}
+.warning-animation {
+  animation: warningPulse 0.6s ease-in-out 3;
+  display: inline-block;
+}
+
+@keyframes warningPulse {
+  0% {
+    font-weight: bold;
+    color: #e74c3c;
+    transform: scale(1.1);
+    text-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+  }
+  33% {
+    font-weight: normal;
+    color: inherit;
+    transform: scale(1);
+    text-shadow: none;
+  }
+  66% {
+    font-weight: bold;
+    color: #e74c3c;
+    transform: scale(1.1);
+    text-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+  }
+  100% {
+    font-weight: normal;
+    color: inherit;
+    transform: scale(1);
+    text-shadow: none;
+  }
 }
 </style>

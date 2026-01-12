@@ -57,9 +57,17 @@ public class IOUtil {
     }
 
     public static void writeString2File(String toWrite, String fileName) throws IOException {
-        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
-        outputStreamWriter.write(toWrite);
-        outputStreamWriter.close();
+        // 1. 定位外部文件的绝对路径（与 readJsonConfig 保持一致）
+        String jarPath = IOUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        Path jarDir = Paths.get(jarPath).getParent();
+        Path externalPath = jarDir.resolve(fileName);
+
+        // 2. 确保父目录存在
+        if (externalPath.getParent() != null) {
+            Files.createDirectories(externalPath.getParent());
+        }
+
+        // 3. 写入文件（使用 UTF-8 编码）
+        Files.write(externalPath, toWrite.getBytes(StandardCharsets.UTF_8));
     }
 }

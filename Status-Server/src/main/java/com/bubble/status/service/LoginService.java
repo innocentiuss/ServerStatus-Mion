@@ -53,7 +53,7 @@ public class LoginService {
         if (isLogin(request))
             return new CommonWebResponse<>(HttpStatus.OK.value(), "ok").toString();
 
-        return new CommonWebResponse<>(HttpStatus.TEMPORARY_REDIRECT.value(), "/login").toString();
+        return new CommonWebResponse<>("/login", HttpStatus.TEMPORARY_REDIRECT.value()).toString();
     }
 
     /**

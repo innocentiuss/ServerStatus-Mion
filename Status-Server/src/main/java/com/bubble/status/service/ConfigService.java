@@ -1,6 +1,7 @@
 package com.bubble.status.service;
 
 
+import com.bubble.status.model.ServerConfigInfoVo;
 import com.bubble.status.utils.JsonUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -100,25 +101,31 @@ public class ConfigService implements InitializingBean {
      * 获取配置文件信息 返回给前端
      * @return json string
      */
-    public String getAllConfigs() {
+    public List<ServerConfigInfoVo> getAllConfigs() {
         String jsonString = IOUtil.readJsonConfig(configFileName);
         Configs configsWrapper = JsonUtil.toObject(jsonString, Configs.class);
         List<ServerConfigInfo> servers = configsWrapper.getServers();
 
         if (servers != null) {
-            for (ServerConfigInfo vo : servers) {
+            for (ServerConfigInfo configInfo : servers) {
                 // 处理 enabled/disabled 状态
-                if (vo.getDisabled() != null) {
-                    vo.setEnabled(!vo.getDisabled());
-                } else if (vo.getEnabled() != null) {
-                    vo.setDisabled(!vo.getEnabled());
+                if (configInfo.getDisabled() != null) {
+                    configInfo.setEnabled(!configInfo.getDisabled());
+                } else if (configInfo.getEnabled() != null) {
+                    configInfo.setDisabled(!configInfo.getEnabled());
                 } else {
-                    vo.setEnabled(true);
-                    vo.setDisabled(false);
+                    configInfo.setEnabled(true);
+                    configInfo.setDisabled(false);
                 }
             }
+
+            return servers.stream().map(config -> {
+                ServerConfigInfoVo vo = new ServerConfigInfoVo();
+                BeanUtils.copyProperties(config, vo);
+                return vo;
+            }).collect(Collectors.toList());
         }
-        return JsonUtil.toJson(servers);
+        return new ArrayList<>();
     }
 
     /**
@@ -138,7 +145,7 @@ public class ConfigService implements InitializingBean {
         servers.add(serverConfigInfo);
 
         // 序列化并保存
-        IOUtil.writeString2File(JsonUtil.toJson(configs), configFileName);
+        IOUtil.writeString2File(JsonUtil.toPrettyJson(configs), configFileName);
         refreshConfig();
         log.info("成功添加新服务器配置啦: username=" + serverConfigInfo.getUsername());
     }

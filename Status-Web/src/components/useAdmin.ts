@@ -1,13 +1,11 @@
 
 import { computed, reactive, ref } from 'vue';
-import { Config, host, port, protocol } from '../../types/config';
+import { ConfigRow, Config, host, port, protocol } from '../../types/config';
 import axios from 'axios';
 
 
-export const editVisible = ref(false);
 export const allowDelete = ref(false);
-export const configsData = reactive<{ arr: Config[] }>({ arr: [] });
-export const editIndex = ref(0);
+export const configsData = reactive<{ arr: ConfigRow[] }>({ arr: [] });
 export const modified = ref(false);
 export const saveLoading = ref(false);
 export const saveButtonText = ref('保存&应用');
@@ -26,6 +24,7 @@ export const reloadClass = computed(() => {
   if (reloadLoading.value == true) return 'ui small disabled loading button';
   return 'ui small button';
 });
+export const showWarning = ref(false)
 
 // 登录检查
 export function checkLogin() {
@@ -64,15 +63,7 @@ export const newConfig: Config = reactive({
   type: '',
   enabled: true
 });
-export const editedConfig: Config = reactive({
-  name: '',
-  password: '',
-  username: '',
-  region: '',
-  location: '',
-  type: '',
-  enabled: true
-});
+
 
 export function addConfigs() {
   addLoading.value = true;
@@ -127,42 +118,53 @@ export function saveConfigs() {
 }
 
 export function deleteConfigs(index: number) {
-  if (allowDelete.value == false) return;
+  if (allowDelete.value == false) {
+    // 显示警告动画
+    showWarning.value = true
+    
+    // 动画结束后重置状态
+    setTimeout(() => {
+      showWarning.value = false
+    }, 1800) // 0.6秒 × 3次 = 1.8秒
+    
+    return;
+  }
+  
   configsData.arr.splice(index, 1);
   allowDelete.value = false;
-  editVisible.value = false;
   modified.value = true;
 }
 
-export function startEdit(config: Config, index: number) {
-  editVisible.value = true;
-  editIndex.value = index;
-  editedConfig.enabled = config.enabled;
-  editedConfig.name = config.name;
-  editedConfig.username = config.username;
-  editedConfig.password = config.password;
-  editedConfig.location = config.location;
-  editedConfig.region = config.region;
-  editedConfig.type = config.type;
+export function startEdit(index: number) {
+  configsData.arr.forEach(row => row._editing = false);
+  const row = configsData.arr[index];
+  row._backup = { ...row };   // 深拷贝原始数据
+  row._editing = true;
 }
+export function finishEdit(index: number) {
+  const row = configsData.arr[index];
 
-export function exitEdit() {
-  editVisible.value = false;
-}
-
-export function finishEdit() {
-  if (editedConfig.username.trim() == '') {
+  if (!row.username.trim()) {
     alert('username不能为空哦');
     return;
   }
-  const deepCopy: Config = { ...editedConfig };
+
+  // username 唯一性校验
   for (let i = 0; i < configsData.arr.length; i++) {
-    if (configsData.arr[i].username == deepCopy.username && i != editIndex.value) {
+    if (i !== index && configsData.arr[i].username === row.username) {
       alert('发现username有重复, 再检查一下');
       return;
     }
   }
-  configsData.arr.splice(editIndex.value, 1, deepCopy);
-  editVisible.value = false;
+
+  row._editing = false;
+  delete row._backup;
   modified.value = true;
 }
+export function cancelEdit(index: number) {
+  const row = configsData.arr[index];
+  Object.assign(row, row._backup);
+  row._editing = false;
+  delete row._backup;
+}
+

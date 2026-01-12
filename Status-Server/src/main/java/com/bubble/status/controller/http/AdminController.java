@@ -68,7 +68,7 @@ public class AdminController {
         try {
             CheckUtil.check(loginService.isLogin(httpServletRequest), "登录不合法, 拒绝访问", HttpStatus.FORBIDDEN.value());
             configService.proceedingAddConfig(serverConfigInfo);
-            return new CommonWebResponse<>("添加成功", HttpStatus.OK.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.OK.value(), "添加成功").toString();
         } catch (CommonException e) {
             return new CommonWebResponse<>(e.getHttpCode(), e.getMessage()).toString();
         } catch (Exception e) {
@@ -81,7 +81,7 @@ public class AdminController {
         try {
             CheckUtil.check(loginService.isLogin(httpServletRequest), "登录不合法, 拒绝访问", HttpStatus.FORBIDDEN.value());
             configService.proceedingSaveConfig(serverConfigInfos);
-            return new CommonWebResponse<>("添加成功", HttpStatus.OK.value()).toString();
+            return new CommonWebResponse<>(HttpStatus.OK.value(), "添加成功").toString();
         } catch (CommonException e) {
             return new CommonWebResponse<>(e.getHttpCode(), e.getMessage()).toString();
         } catch (Exception e) {

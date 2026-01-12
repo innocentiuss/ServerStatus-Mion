@@ -19,13 +19,13 @@ public class WebSocketHandler {
     @OnOpen
     public void onOpen(Session session) {
         sessions.add(session);
-        log.info("New connection: {}", session.getId());
+        log.info("New connection, id: {}", session.getId());
     }
 
     @OnClose
     public void onClose(Session session) {
         sessions.remove(session);
-        log.info("Connection closed: {}", session.getId());
+        log.info("Connection closed, id: {}", session.getId());
     }
 
     @OnError
@@ -36,7 +36,7 @@ public class WebSocketHandler {
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        log.debug("Received message from client: {}", message);
+        log.debug("Received message from client. id: {} message: {}", session.getId(), message);
     }
 
     public static void sendToAllClients(String message) {
