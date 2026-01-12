@@ -23,14 +23,9 @@ public class IOUtil {
     }
 
     public static String readJsonConfig(String jsonFileName) {
-        URL url = IOUtil.class.getProtectionDomain().getCodeSource().getLocation();
-        Path jarPath = null;
-        try {
-            jarPath = Paths.get(url.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        Path jarDir = jarPath.getParent();
+        // 1. 定位外部文件的绝对路径（默认相对于执行程序的当前工作目录）
+        String jarPath = IOUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        Path jarDir = Paths.get(jarPath).getParent();
         Path externalPath = jarDir.resolve(jsonFileName);
 
         try {
@@ -64,14 +59,9 @@ public class IOUtil {
     }
 
     public static void writeString2File(String toWrite, String fileName) throws IOException {
-        URL url = IOUtil.class.getProtectionDomain().getCodeSource().getLocation();
-        Path jarPath = null;
-        try {
-            jarPath = Paths.get(url.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        Path jarDir = jarPath.getParent();
+        // 1. 定位外部文件的绝对路径（默认相对于执行程序的当前工作目录）
+        String jarPath = IOUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        Path jarDir = Paths.get(jarPath).getParent();
         Path externalPath = jarDir.resolve(fileName);
 
         // 2. 确保父目录存在
