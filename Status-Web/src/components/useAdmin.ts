@@ -45,7 +45,7 @@ export function loadConfigs() {
     withCredentials: true
   }).then(res => {
     if (res.data.code == 200) {
-      configsData.arr = JSON.parse(res.data.data);
+      configsData.arr = res.data.data;
       reloadLoading.value = false;
       modified.value = false;
     } else {
