@@ -5,6 +5,8 @@ import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,9 +23,14 @@ public class IOUtil {
     }
 
     public static String readJsonConfig(String jsonFileName) {
-        // 1. 定位外部文件的绝对路径（默认相对于执行程序的当前工作目录）
-        String jarPath = IOUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        Path jarDir = Paths.get(jarPath).getParent();
+        URL url = IOUtil.class.getProtectionDomain().getCodeSource().getLocation();
+        Path jarPath = null;
+        try {
+            jarPath = Paths.get(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        Path jarDir = jarPath.getParent();
         Path externalPath = jarDir.resolve(jsonFileName);
 
         try {
@@ -57,9 +64,14 @@ public class IOUtil {
     }
 
     public static void writeString2File(String toWrite, String fileName) throws IOException {
-        // 1. 定位外部文件的绝对路径（与 readJsonConfig 保持一致）
-        String jarPath = IOUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        Path jarDir = Paths.get(jarPath).getParent();
+        URL url = IOUtil.class.getProtectionDomain().getCodeSource().getLocation();
+        Path jarPath = null;
+        try {
+            jarPath = Paths.get(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        Path jarDir = jarPath.getParent();
         Path externalPath = jarDir.resolve(fileName);
 
         // 2. 确保父目录存在
