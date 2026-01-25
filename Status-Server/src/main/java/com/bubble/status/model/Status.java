@@ -6,9 +6,9 @@ import lombok.Data;
 public class Status {
     private Long now;
     private String uptime;
-    private Double load1;
-    private Double load5;
-    private Double load15;
+    private Double load_1;
+    private Double load_5;
+    private Double load_15;
     private String memory_total;
     private String memory_used;
     private String swap_total;
@@ -31,6 +31,6 @@ public class Status {
     private Integer udp;
     private Integer process;
     private Integer thread;
-    private String ioRead;
-    private String ioWrite;
+    private String io_read;
+    private String io_write;
 }

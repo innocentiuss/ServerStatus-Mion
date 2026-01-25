@@ -73,7 +73,7 @@
         <div class="ui three tiny statistics">
           <div class="statistic">
             <div class="value">
-              {{ getStatus ? server.load1 : '-' }}
+              {{ getStatus ? server.load_1 : '-' }}
             </div>
             <div class="label">
               负载1min
@@ -81,7 +81,7 @@
           </div>
           <div class="statistic">
             <div class="value">
-              {{ getStatus ? server.load5 : '-' }}
+              {{ getStatus ? server.load_5 : '-' }}
             </div>
             <div class="label">
               负载5min
@@ -89,7 +89,7 @@
           </div>
           <div class="statistic">
             <div class="value">
-              {{ getStatus ? server.load15 : '-' }}
+              {{ getStatus ? server.load_15 : '-' }}
             </div>
             <div class="label">
               负载15min

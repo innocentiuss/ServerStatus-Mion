@@ -88,9 +88,9 @@ public class WebStatusService {
 
     // 负载保留两位小数
     private void uptimeRound2(ServerInfoVo serverInfoVo) {
-        if (serverInfoVo.getLoad1() != null) serverInfoVo.setLoad1(round(serverInfoVo.getLoad1(), 2));
-        if (serverInfoVo.getLoad5() != null) serverInfoVo.setLoad5(round(serverInfoVo.getLoad5(), 2));
-        if (serverInfoVo.getLoad15() != null) serverInfoVo.setLoad15(round(serverInfoVo.getLoad15(), 2));
+        if (serverInfoVo.getLoad_1() != null) serverInfoVo.setLoad_1(round(serverInfoVo.getLoad_1(), 2));
+        if (serverInfoVo.getLoad_5() != null) serverInfoVo.setLoad_5(round(serverInfoVo.getLoad_5(), 2));
+        if (serverInfoVo.getLoad_15() != null) serverInfoVo.setLoad_15(round(serverInfoVo.getLoad_15(), 2));
     }
 
     // loss保留一位小数
